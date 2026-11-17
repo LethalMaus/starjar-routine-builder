@@ -72,17 +72,27 @@ const button = (label, fn, secondary = false, attrs = {}) =>
   );
 const field = (label, node) =>
   el("label", { class: "field" }, el("span", {}, label), node);
-const checkbox = (label, value, fn, id) =>
+const checkbox = (label, value, fn, id, help = "") =>
   el(
     "label",
-    { class: "check" },
+    { class: help ? "check check-explained" : "check" },
     el("input", {
       type: "checkbox",
       id,
       checked: value,
+      ...(help
+        ? { "aria-labelledby": id + "-label", "aria-describedby": id + "-help" }
+        : {}),
       onchange: (e) => fn(e.target.checked),
     }),
-    el("span", {}, label),
+    help
+      ? el(
+          "span",
+          { class: "check-copy" },
+          el("strong", { id: id + "-label" }, label),
+          el("small", { id: id + "-help" }, help),
+        )
+      : el("span", {}, label),
   );
 function select(value, values, fn, id, labels = (v) => v) {
   return el(
@@ -225,7 +235,9 @@ function render() {
     el(
       "nav",
       {},
-      button(t("create"), fresh, true),
+      button(t("create"), fresh, true, {
+        "aria-current": screen === "create" ? "page" : "false",
+      }),
       button(
         t("saved"),
         () => {
@@ -234,6 +246,7 @@ function render() {
           render();
         },
         true,
+        { "aria-current": screen === "saved" ? "page" : "false" },
       ),
     ),
     el(
@@ -342,7 +355,7 @@ function renderCreate(main) {
     ),
     el(
       "details",
-      {},
+      { class: "preference-panel" },
       el("summary", {}, t("rewardPreferences")),
       el("p", { class: "muted" }, t("rewardPreferencesInfo")),
       ...["no_purchases", "no_screens"].map((c) =>
@@ -354,6 +367,7 @@ function renderCreate(main) {
               ? [...input.constraints, c]
               : input.constraints.filter((x) => x !== c)),
           c,
+          t(c + "_help"),
         ),
       ),
     ),

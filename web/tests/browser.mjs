@@ -46,6 +46,7 @@ try {
     await page.screenshot({
       path: path.join(out, lang + "-create.png"),
       fullPage: true,
+      animations: "disabled",
     });
     await page
       .getByRole("button", {
@@ -143,6 +144,7 @@ try {
     await page.screenshot({
       path: path.join(out, lang + "-selection.png"),
       fullPage: true,
+      animations: "disabled",
     });
     await page.setViewportSize({ width: 320, height: 900 });
     ok(

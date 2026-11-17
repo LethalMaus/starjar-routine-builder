@@ -468,3 +468,20 @@ strings.en.cloudInfo =
   "Basic suggestions prefer this device when available. AI-generated badges, streaks, reminders and urgency use the cloud. Your original description, options and current/discarded idea context can be sent to Google through Firebase AI Logic. The original description is not saved by this app.";
 strings.de.cloudInfo =
   "Grundlegende Vorschläge werden nach Möglichkeit auf diesem Gerät erstellt. Für Abzeichen, Serienboni, Erinnerungen und Dringlichkeit nutzt die KI die Cloud. Deine ursprüngliche Beschreibung, Einstellungen sowie aktuelle und verworfene Ideen können über Firebase AI Logic an Google gesendet werden. Die ursprüngliche Beschreibung wird von dieser App nicht gespeichert.";
+
+Object.assign(strings.en, {
+  no_purchases_help:
+    "Suggest rewards that do not involve buying anything, such as choosing a game you already own.",
+  no_screens_help:
+    "Suggest rewards without TV, phones, tablets or video games, such as choosing an outdoor activity.",
+  rewardPreferencesInfo:
+    "These choices guide new reward suggestions. They do not change your existing ideas.",
+});
+Object.assign(strings.de, {
+  no_purchases_help:
+    "Belohnungen vorschlagen, für die du nichts kaufen musst – zum Beispiel ein Spiel aussuchen, das ihr schon habt.",
+  no_screens_help:
+    "Belohnungen ohne Fernseher, Handy, Tablet oder Videospiele vorschlagen – zum Beispiel eine Aktivität im Freien aussuchen.",
+  rewardPreferencesInfo:
+    "Diese Wünsche gelten für neue Belohnungsvorschläge. Deine bisherigen Ideen bleiben unverändert.",
+});

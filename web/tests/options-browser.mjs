@@ -65,6 +65,7 @@ try {
     await p.screenshot({
       path: out + "/" + lang + "-icons.png",
       fullPage: true,
+      animations: "disabled",
     });
     await card.locator('.icon-grid button[title="Dishwasher"]').click();
     await card.locator(".badge-editor summary").first().click();
@@ -103,6 +104,7 @@ try {
     await p.screenshot({
       path: out + "/" + lang + "-phone-options.png",
       fullPage: true,
+      animations: "disabled",
     });
     if (
       await p.evaluate(
