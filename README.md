@@ -1,6 +1,6 @@
 # StarJar Routine Builder
 
-Build an everyday routine, review the suggestions, choose star amounts and export tasks and rewards to StarJar. Routine Builder is for adults aged 18 and over. It includes an Android app and a Chrome web app, with English and German interfaces.
+Find tasks and rewards to help your child with an everyday difficulty, review the ideas and export your choices to StarJar. Routine Builder is for adults aged 18 and over. It includes an Android app and a Chrome web app, with English and German interfaces.
 
 You can write routines yourself without an account, subscription or AI service. AI suggestions always open in the editor for review; they are never added to StarJar automatically.
 
@@ -17,6 +17,8 @@ npm run preview
 ```
 
 Open the localhost address printed by Vite. See [web setup](web/README.md) for local AI, optional cloud configuration and browser tests.
+
+The Chrome app suggests a suitable number of task and reward alternatives. Keep, edit or discard each idea; asking for more adds suggestions without replacing existing cards. Optional reward preferences exclude purchases or screen time. Android currently uses the earlier fixed-size routine flow.
 
 ## Build the Android app
 
@@ -47,10 +49,10 @@ Suggestions can contain mistakes. Review names, language, suitability and star a
 
 ## Saving, privacy and export
 
-- Descriptions are held in memory, not saved with routines. When cloud use is allowed, the current description, language and constraints can be sent to Google's model service.
+- Your original problem description, age range and follow-up feedback stay in memory. When cloud use is allowed, these and existing/discarded idea context can be sent to Google's model service. Edited task/reward descriptions are saved with the plan.
 - Edited drafts and saved routines stay on the device: browser local storage on web, app-private no-backup files on Android. They are not synchronised between devices.
 - App Check processes app/device signals. Model downloads and provider verification can use the network independently of prompt inference.
-- Exported JSON includes only reviewed task/reward names and integer star amounts. Import the file using StarJar's template library.
+- The Chrome app exports only items marked Kept, including names, descriptions, stars, icons, colours, frequency limits and approval settings. Android currently retains the earlier basic names/stars editor and export. Import the file using StarJar's template library.
 - Export a copy before clearing browser/app data. There is no account-based backup or restore.
 
 See [usage limits](docs/USAGE_POLICY.md) for the differences between Android and web.

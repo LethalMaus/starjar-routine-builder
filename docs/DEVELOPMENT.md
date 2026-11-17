@@ -2,11 +2,11 @@
 
 ## Data flow
 
-A request contains a goal, output language, one to three tasks, optional reward and supported constraints. Android uses `androidApp/src/main/assets/routine-instructions.txt`. The browser planning flow uses `web/src/planning-instructions.txt` to turn a difficulty, optional time window and revision feedback into a small routine. Firebase AI Logic provides local and cloud inference; the returned inference source determines the result label.
+Android requests contain a goal, output language, one to three tasks, optional reward and supported constraints. Android uses `androidApp/src/main/assets/routine-instructions.txt`. The browser planning flow uses `web/src/parent-instructions.txt` to turn a child’s difficulty, optional age/time context and feedback into task and reward alternatives. Firebase AI Logic provides local and cloud inference; the returned inference source determines the result label.
 
-Generated names are validated before editing. Reviewed names and star amounts are validated again before saving/export. The export constructs a fresh allowlisted `starjar-templates` version-1 envelope, excluding local IDs, routine titles, original requests and generation metadata.
+Generated names are validated before editing. Reviewed fields are validated again before export, including strict integer stars, icon/colour allowlists, frequency limits and approval booleans. The export constructs a fresh allowlisted `starjar-templates` version-1 envelope, excluding local IDs, routine titles, original requests and generation metadata.
 
-Kotlin validation lives in `core/`; the browser equivalent is `web/src/core.js`. Keep their limits and export contracts aligned. Model output is untrusted data; browser rendering uses text nodes rather than HTML interpolation.
+Kotlin validation lives in `core/`; the browser parent flow uses `web/src/parent-plan.js`, with legacy validation in `web/src/core.js`. The browser exports a richer subset of the same StarJar version-1 contract; Android currently exports names and stars only. Browser merges append new ideas, preserve existing cards and exclude exact discarded names. Version-2 browser storage preserves choices and migrates legacy records. Model output is untrusted data; browser rendering uses text nodes rather than HTML interpolation.
 
 ## Tests
 

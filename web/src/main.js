@@ -1,170 +1,148 @@
 import "./style.css";
-import { cancellable } from "./cancellation.js";
 import starry from "../../androidApp/src/main/res/drawable/starry.png";
 import { strings } from "./strings.js";
-import { generate, capability, cloudConfigured } from "./ai.js";
+import { generate, cloudConfigured } from "./ai.js";
+import { cancellable } from "./cancellation.js";
 import {
-  points,
-  exportRoutine,
-  readSaved,
-  saveRoutine,
-  deleteRoutine,
-} from "./core.js";
-const $ = (id) => document.getElementById(id);
-const root = $("app");
+  icons,
+  colors,
+  frequencies,
+  blankPlan,
+  newItem,
+  mergeSuggestions,
+  discardItem,
+  contextFor,
+  exportPlan,
+  cleanPlan,
+  fromLegacy,
+  loadPlans,
+  savePlan,
+  deletePlan,
+} from "./parent-plan.js";
+const root = document.getElementById("app"),
+  $ = (id) => document.getElementById(id);
 let lang = navigator.language.startsWith("de") ? "de" : "en",
   adult = false,
   screen = "create",
-  edit = null,
+  plan = null,
   receipt = null,
-  cloudAllowed = false,
+  reason = "",
+  feedback = "",
+  status = "",
   busy = false,
   controller = null,
-  status = "",
-  availability = "unavailable",
-  storageFailed = false;
-let input = { goal: "", count: 3, reward: true, constraints: [], minutes: "" };
-let planReason = "",
-  feedback = "";
+  cloudAllowed = false,
+  storageError = false;
+const expanded = new Set();
+let input = { goal: "", ageBand: "unspecified", minutes: "", constraints: [] };
 const t = (k) => strings[lang][k] ?? k;
 function el(tag, attrs = {}, ...children) {
-  const node = document.createElement(tag);
+  const n = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
-    if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
-    else if (k === "class") node.className = v;
-    else if (k === "text") node.textContent = v;
-    else if (k in node) node[k] = v;
-    else node.setAttribute(k, v);
+    if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
+    else if (k === "class") n.className = v;
+    else if (k in n) n[k] = v;
+    else n.setAttribute(k, v);
   }
   for (const c of children.flat())
     if (c !== null && c !== undefined)
-      node.append(c instanceof Node ? c : document.createTextNode(c));
-  return node;
+      n.append(c instanceof Node ? c : document.createTextNode(c));
+  return n;
 }
-const button = (text, fn, secondary = false, extra = {}) =>
+const button = (label, fn, secondary = false, attrs = {}) =>
   el(
     "button",
     {
       type: "button",
       class: secondary ? "secondary" : "primary",
       onclick: fn,
-      ...extra,
+      ...attrs,
     },
-    text,
+    label,
   );
 const field = (label, node) =>
   el("label", { class: "field" }, el("span", {}, label), node);
-const check = (label, checked, fn, id) =>
+const checkbox = (label, value, fn, id) =>
   el(
     "label",
     { class: "check" },
     el("input", {
       type: "checkbox",
-      checked,
       id,
+      checked: value,
       onchange: (e) => fn(e.target.checked),
     }),
     el("span", {}, label),
   );
-function message(value) {
-  status = value;
-  const n = $("status");
-  if (n) n.textContent = value;
+function select(value, values, fn, id, labels = (v) => v) {
+  return el(
+    "select",
+    { id, value, onchange: (e) => fn(e.target.value) },
+    ...values.map((v) =>
+      el("option", { value: v, selected: v === value }, labels(v)),
+    ),
+  );
+}
+function message(s) {
+  status = s;
+  if ($("status")) $("status").textContent = s;
 }
 function persist() {
-  if (!edit) return;
+  if (!plan) return;
   try {
-    localStorage.setItem("routine-draft-v1", JSON.stringify({ edit, receipt }));
+    localStorage.setItem(
+      "routine-draft-v2",
+      JSON.stringify({ plan: cleanPlan(plan) }),
+    );
   } catch {
-    storageFailed = true;
+    storageError = true;
     message(t("storage"));
   }
 }
 function restore() {
   try {
     adult = localStorage.getItem("routine-adult-v1") === "yes";
-    const raw = localStorage.getItem("routine-draft-v1");
+    const raw = localStorage.getItem("routine-draft-v2");
     if (raw) {
-      const data = JSON.parse(raw);
-      const e = data.edit;
-      if (
-        !e ||
-        typeof e.title !== "string" ||
-        !Array.isArray(e.tasks) ||
-        e.tasks.length > 3 ||
-        !["en", "de"].includes(e.language)
-      )
-        throw Error();
-      for (const i of [...e.tasks, ...(e.reward ? [e.reward] : [])])
-        if (typeof i.name !== "string" || typeof i.pointAmount !== "string")
-          throw Error();
-      edit = e;
-      receipt = ["ON_DEVICE", "IN_CLOUD", "REVIEWED"].includes(
-        data.receipt?.source,
-      )
-        ? data.receipt
-        : null;
+      plan = cleanPlan(JSON.parse(raw).plan);
       screen = "edit";
-      status = t("restore");
+    } else {
+      const old = localStorage.getItem("routine-draft-v1");
+      if (old) {
+        plan = fromLegacy(JSON.parse(old).edit);
+        screen = "edit";
+      }
     }
   } catch {
-    storageFailed = true;
+    storageError = true;
     status = t("storage");
   }
 }
 function fresh() {
-  if (edit && !confirm(t("newConfirm"))) return;
-  edit = null;
-  planReason = "";
+  if (plan && !confirm(t("newConfirm"))) return;
+  plan = null;
+  reason = "";
   feedback = "";
   receipt = null;
   status = "";
   screen = "create";
+  input = { goal: "", ageBand: "unspecified", minutes: "", constraints: [] };
   try {
+    localStorage.removeItem("routine-draft-v2");
     localStorage.removeItem("routine-draft-v1");
   } catch {
-    storageFailed = true;
+    storageError = true;
   }
   render();
 }
-function editorFrom(draft, previous = null) {
-  planReason = draft?.reason ?? "";
-  feedback = "";
-  edit = {
-    id: previous?.id ?? crypto.randomUUID(),
-    title: previous?.title ?? t("draftTitle"),
-    language: previous?.language ?? lang,
-    tasks: (draft?.tasks ?? Array(input.count).fill("")).map((name) => ({
-      name,
-      pointAmount:
-        previous?.tasks.find((x) => x.name === name)?.pointAmount ?? "5",
-    })),
-    reward: (previous ? Boolean(previous.reward) : input.reward)
-      ? {
-          name: draft?.reward ?? "",
-          pointAmount: previous?.reward?.pointAmount ?? "20",
-        }
-      : null,
-  };
+function manual() {
+  plan = blankPlan(lang, t("draftTitle"));
+  plan.items.push(newItem("task"));
+  receipt = null;
+  reason = "";
   screen = "edit";
   persist();
   render();
-}
-function collect() {
-  return {
-    ...edit,
-    title: edit.title.trim(),
-    tasks: edit.tasks.map((x) => ({
-      name: x.name.trim(),
-      pointAmount: points(x.pointAmount),
-    })),
-    reward: edit.reward
-      ? {
-          name: edit.reward.name.trim(),
-          pointAmount: points(edit.reward.pointAmount),
-        }
-      : null,
-  };
 }
 function render() {
   document.documentElement.lang = lang;
@@ -181,24 +159,16 @@ function render() {
       ),
       field(
         lang === "de" ? "Sprache" : "Language",
-        el(
-          "select",
-          {
-            id: "language",
-            disabled: busy,
-            onchange: (e) => {
-              lang = e.target.value;
-              status = "";
-              render();
-            },
+        select(
+          lang,
+          ["en", "de"],
+          (v) => {
+            lang = v;
+            status = "";
+            render();
           },
-          ...["en", "de"].map((v) =>
-            el(
-              "option",
-              { value: v, selected: lang === v },
-              v === "en" ? "English" : "Deutsch",
-            ),
-          ),
+          "language",
+          (v) => (v === "en" ? "English" : "Deutsch"),
         ),
       ),
     ),
@@ -211,10 +181,10 @@ function render() {
         "section",
         { class: "card welcome" },
         el("img", { src: starry, alt: "", class: "mascot" }),
-        el("h1", {}, t("heading")),
-        el("p", {}, t("intro")),
-        el("p", { class: "eyebrow" }, t("adult")),
-        check(
+        el("h1", {}, t("parentHeading")),
+        el("p", {}, t("parentIntro")),
+        el("p", {}, t("adult")),
+        checkbox(
           t("age"),
           false,
           (v) => {
@@ -229,7 +199,7 @@ function render() {
             try {
               localStorage.setItem("routine-adult-v1", "yes");
             } catch {
-              storageFailed = true;
+              storageError = true;
             }
             render();
           },
@@ -244,8 +214,8 @@ function render() {
   main.append(
     el(
       "nav",
-      { "aria-label": lang === "de" ? "Routinen" : "Routines" },
-      button(t("create"), fresh, screen !== "create", { disabled: busy }),
+      {},
+      button(t("create"), fresh, true),
       button(
         t("saved"),
         () => {
@@ -253,33 +223,49 @@ function render() {
           status = "";
           render();
         },
-        screen !== "saved",
-        { disabled: busy },
+        true,
       ),
     ),
-  );
-  main.append(
     el(
       "p",
-      { id: "status", role: "status", "aria-live": "polite", class: "status" },
+      { role: "status", "aria-live": "polite", class: "status", id: "status" },
       status,
     ),
   );
   if (!navigator.onLine)
     main.append(el("p", { class: "notice" }, t("offline")));
-  if (storageFailed) main.append(el("p", { class: "notice" }, t("storage")));
+  if (storageError) main.append(el("p", { class: "notice" }, t("storage")));
   if (screen === "create") renderCreate(main);
-  if (screen === "edit") {
-    renderEdit(main);
-    if (busy)
-      for (const control of main.querySelectorAll(
-        "input,textarea,select,button",
-      )) {
-        if (control.textContent !== t("cancel")) control.disabled = true;
-      }
-  }
-  if (screen === "saved") renderSaved(main);
+  else if (screen === "edit" && plan) renderPlan(main);
+  else renderSaved(main);
   main.append(el("footer", {}, t("adult"), " · ", t("draftSaved")));
+  if (busy)
+    for (const n of root.querySelectorAll("input,select,textarea,button"))
+      if (n.id !== "cancel") n.disabled = true;
+}
+function cloudControl() {
+  return el(
+    "div",
+    { class: "privacy" },
+    checkbox(
+      t("cloud"),
+      cloudAllowed,
+      (v) => {
+        cloudAllowed = v;
+        render();
+      },
+      "cloud",
+    ),
+    el(
+      "p",
+      { class: "muted" },
+      !cloudConfigured
+        ? t("cloudOff")
+        : cloudAllowed
+          ? t("cloudInfo")
+          : t("localInfo"),
+    ),
+  );
 }
 function renderCreate(main) {
   const card = el("section", { class: "card" });
@@ -288,185 +274,118 @@ function renderCreate(main) {
     el(
       "div",
       { class: "hero" },
-      el("div", {}, el("h1", {}, t("heading")), el("p", {}, t("intro"))),
+      el(
+        "div",
+        {},
+        el("h1", {}, t("parentHeading")),
+        el("p", {}, t("parentIntro")),
+      ),
       el("img", { src: starry, alt: "", class: "mascot" }),
     ),
   );
   const form = el("form", {
     onsubmit: (e) => {
       e.preventDefault();
-      startGeneration();
+      suggest(false);
     },
   });
   card.append(form);
   form.append(
     field(
-      t("goal"),
+      t("parentGoal"),
       el("textarea", {
         id: "goal",
+        rows: 3,
         required: true,
         maxLength: 1200,
-        rows: 3,
         value: input.goal,
-        placeholder: t("placeholder"),
-        disabled: busy,
-        oninput: (e) => {
-          input.goal = e.target.value;
-        },
+        placeholder: t("parentPlaceholder"),
+        oninput: (e) => (input.goal = e.target.value),
       }),
     ),
     el("p", { class: "muted" }, t("privacy")),
-  );
-  form.append(
-    field(
-      t("minutes"),
-      el("input", {
-        id: "minutes",
-        type: "number",
-        min: 1,
-        max: 180,
-        value: input.minutes,
-        placeholder: "20",
-        disabled: busy,
-        oninput: (e) => {
-          input.minutes = e.target.value;
-        },
-      }),
+    el(
+      "div",
+      { class: "options" },
+      field(
+        t("ageBand"),
+        select(
+          input.ageBand,
+          ["unspecified", "preschool", "primary", "teen"],
+          (v) => (input.ageBand = v),
+          "age-band",
+          (v) => t("age_" + v),
+        ),
+      ),
+      field(
+        t("minutes"),
+        el("input", {
+          id: "minutes",
+          type: "number",
+          min: 1,
+          max: 180,
+          value: input.minutes,
+          placeholder: "20",
+          oninput: (e) => (input.minutes = e.target.value),
+        }),
+      ),
     ),
-  );
-  const options = el("div", { class: "options" });
-  form.append(options);
-  options.append(
-    field(
-      t("count"),
-      el(
-        "select",
-        {
-          id: "count",
-          disabled: busy,
-          onchange: (e) => (input.count = Number(e.target.value)),
-        },
-        ...[1, 2, 3].map((n) =>
-          el("option", { value: n, selected: input.count === n }, String(n)),
+    el(
+      "details",
+      {},
+      el("summary", {}, t("rewardPreferences")),
+      el("p", { class: "muted" }, t("rewardPreferencesInfo")),
+      ...["no_purchases", "no_screens"].map((c) =>
+        checkbox(
+          t(c),
+          input.constraints.includes(c),
+          (v) =>
+            (input.constraints = v
+              ? [...input.constraints, c]
+              : input.constraints.filter((x) => x !== c)),
+          c,
         ),
       ),
     ),
-    check(
-      t("reward"),
-      input.reward,
-      (v) => (input.reward = v),
-      "include-reward",
-    ),
-  );
-  for (const c of ["no_purchases", "no_screens", "short_tasks"])
-    options.append(
-      check(
-        t(c),
-        input.constraints.includes(c),
-        (v) => {
-          input.constraints = v
-            ? [...input.constraints, c]
-            : input.constraints.filter((x) => x !== c);
-        },
-        c,
-      ),
-    );
-  form.append(
-    el(
-      "div",
-      { class: "privacy" },
-      check(
-        t("cloud"),
-        cloudAllowed,
-        (v) => {
-          cloudAllowed = v;
-          render();
-        },
-        "cloud",
-      ),
-      el(
-        "p",
-        { class: "muted" },
-        cloudAllowed ? t("cloudInfo") : t("localInfo"),
-      ),
-    ),
-  );
-  if (!cloudConfigured) {
-    form.querySelector("#cloud").disabled = true;
-    form.append(el("p", { class: "muted" }, t("cloudOff")));
-  }
-  form.append(
-    el(
-      "p",
-      { class: "capability", id: "capability" },
-      t(
-        availability === "available"
-          ? "ready"
-          : availability === "downloadable" || availability === "downloading"
-            ? "download"
-            : "unavailable",
-      ),
-    ),
+    cloudControl(),
     el(
       "details",
       {},
       el("summary", {}, t("settings")),
       el("p", {}, t("setup")),
     ),
-  );
-  const actions = el(
-    "div",
-    { class: "actions" },
     el(
-      "button",
-      { type: "submit", disabled: busy },
-      busy ? t("working") : t("generate"),
-    ),
-    button(
-      t("manual"),
-      () => {
-        receipt = null;
-        editorFrom(null);
-      },
-      true,
-      { disabled: busy },
+      "div",
+      { class: "actions" },
+      el(
+        "button",
+        { type: "submit", disabled: busy },
+        busy ? t("working") : t("suggestIdeas"),
+      ),
+      button(t("manual"), manual, true),
     ),
   );
+  if (!cloudConfigured) form.querySelector("#cloud").disabled = true;
   if (busy)
-    actions.append(
-      button(
-        t("cancel"),
-        () => {
-          controller?.abort();
-          message(t("cancelled"));
-        },
-        true,
-      ),
+    form.append(
+      button(t("cancel"), () => controller?.abort(), true, { id: "cancel" }),
     );
-  form.append(actions);
-  if (busy)
-    for (const e of form.querySelectorAll("input,select")) e.disabled = true;
 }
-async function startGeneration(revise = false) {
+async function suggest(more) {
   if (busy) return;
-  if (!revise && edit && !confirm(t("newConfirm"))) return;
-  if (revise && !feedback.trim()) return;
-  const previous = revise ? structuredClone(edit) : null;
+  if (more && !feedback.trim()) return;
+  const current = plan
+    ? structuredClone(plan)
+    : blankPlan(lang, t("draftTitle"));
   const r = {
-    goal: input.goal,
-    planning: true,
+    parentPlanning: true,
+    goal: input.goal.trim() || (more ? feedback.trim() : ""),
+    language: current.language,
+    ageBand: input.ageBand,
     availableMinutes: input.minutes === "" ? null : Number(input.minutes),
-    ...(revise
-      ? {
-          feedback: feedback.trim(),
-          currentTasks: edit.tasks.map((x) => x.name.trim()),
-          currentReward: edit.reward?.name.trim() ?? null,
-        }
-      : {}),
-    language: revise ? edit.language : lang,
-    taskCount: revise ? Math.max(1, edit.tasks.length) : input.count,
-    includeReward: revise ? Boolean(edit.reward) : input.reward,
     constraints: [...input.constraints],
+    feedback: more ? feedback.trim() : "",
+    ...contextFor(current),
   };
   controller = new AbortController();
   const signal = controller.signal;
@@ -480,272 +399,425 @@ async function startGeneration(revise = false) {
         signal,
         onProgress: (p) => {
           if (!signal.aborted)
-            message(t("download") + " · " + Math.round(p * 100) + "%");
+            message(t("download") + " " + Math.round(p * 100) + "%");
         },
       }),
       signal,
       600000,
     );
     if (signal.aborted) return;
+    const merged = mergeSuggestions(current, result.draft);
+    plan = merged.plan;
     receipt = result.receipt;
-    status = "";
-    editorFrom(result.draft, previous);
+    reason = result.draft.reason;
+    feedback = "";
+    screen = "edit";
+    status = merged.added ? t("ideasAdded") : t("noNewIdeas");
+    persist();
   } catch (e) {
-    // Only bounded diagnostic codes; never log descriptions or model output.
+    if (e.message === "TIMEOUT") controller?.abort();
     const diagnostic = String(e.code || e.message || "unknown");
     console.warn(
       "Routine generation code:",
       /^[A-Za-z0-9_/-]{1,80}$/.test(diagnostic) ? diagnostic : "unknown",
     );
-    if (e.message === "TIMEOUT") controller?.abort();
-    if (signal.aborted) message(t("cancelled"));
-    else
-      message(
-        t(
-          e.message === "NEEDS_INPUT"
+    message(
+      t(
+        signal.aborted
+          ? "cancelled"
+          : e.message === "NEEDS_INPUT"
             ? "needs"
-            : !cloudAllowed && availability === "unavailable"
-              ? "unsupported"
-              : "error",
-        ),
-      );
+            : "error",
+      ),
+    );
   } finally {
     busy = false;
     controller = null;
     render();
   }
 }
-function renderEdit(main) {
-  if (!edit) {
-    screen = "create";
-    render();
-    return;
-  }
+const emoji = {
+  Check: "✓",
+  Alarm: "⏰",
+  Bed: "🛏",
+  Brush: "🪥",
+  School: "🎒",
+  MenuBook: "📖",
+  Redeem: "🎁",
+  MusicNote: "♫",
+  SmartToy: "🧩",
+  Celebration: "🎉",
+  SelfImprovement: "☀",
+};
+const colorHex = {
+  GREEN: "#15803d",
+  BLUE: "#1d4ed8",
+  GRAY: "#64748b",
+  WHITE: "#cbd5e1",
+  PURPLE: "#7e22ce",
+  YELLOW: "#a16207",
+  RED: "#b91c1c",
+};
+function renderPlan(main) {
   const card = el("section", { class: "card" });
   main.append(card);
-  card.append(
-    el("h1", {}, t("review")),
-    el("p", {}, t("reviewInfo")),
-    el(
-      "p",
-      { class: "badge", id: "receipt" },
-      receipt?.source === "REVIEWED"
-        ? t("reviewedLabel")
-        : receipt
-          ? t(receipt.source === "ON_DEVICE" ? "local" : "remote") +
-            " · " +
-            receipt.model +
-            " · " +
-            (receipt.durationMs / 1000).toFixed(1) +
-            " s"
-          : t("manualLabel"),
-    ),
-  );
+  card.append(el("h1", {}, t("chooseHeading")), el("p", {}, t("chooseInfo")));
+  if (receipt)
+    card.append(
+      el(
+        "p",
+        { class: "badge", id: "receipt" },
+        t(receipt.source === "ON_DEVICE" ? "local" : "remote") +
+          " · " +
+          receipt.model,
+      ),
+    );
+  if (reason)
+    card.append(el("p", { class: "notice", id: "plan-reason" }, reason));
   card.append(
     field(
       t("title"),
       el("input", {
         id: "title",
         maxLength: 120,
-        value: edit.title,
+        value: plan.title,
         oninput: (e) => {
-          edit.title = e.target.value;
+          plan.title = e.target.value;
           persist();
         },
       }),
     ),
   );
-  if (planReason)
-    card.append(el("p", { class: "notice", id: "plan-reason" }, planReason));
-  if (input.goal.trim()) {
+  for (const kind of ["task", "reward"]) {
     card.append(
-      field(
-        t("feedback"),
-        el("textarea", {
-          id: "feedback",
-          maxLength: 600,
-          rows: 2,
-          value: feedback,
-          disabled: busy,
-          placeholder: t("feedbackHint"),
-          oninput: (e) => {
-            feedback = e.target.value;
-          },
-        }),
-      ),
-      button(
-        busy ? t("working") : t("revise"),
-        () => startGeneration(true),
-        true,
-        { disabled: busy },
+      el(
+        "h2",
+        { class: "section-title" },
+        t(kind === "task" ? "taskIdeas" : "rewardIdeas"),
       ),
     );
-    if (busy) card.append(button(t("cancel"), () => controller?.abort(), true));
+    for (const item of plan.items.filter((x) => x.kind === kind))
+      card.append(itemCard(item));
+    card.append(
+      button(
+        "+ " + t(kind === "task" ? "addOwnTask" : "addOwnReward"),
+        () => {
+          if (plan.items.length >= 40) {
+            message(t("planFull"));
+            return;
+          }
+          plan.items.push(newItem(kind));
+          persist();
+          render();
+        },
+        true,
+      ),
+    );
   }
-  const row = (item, label, remove) =>
-    el(
-      "div",
-      { class: "item" },
-      field(
-        label,
-        el("input", {
-          maxLength: 120,
-          value: item.name,
-          "aria-label": label,
-          oninput: (e) => {
-            item.name = e.target.value;
-            persist();
-          },
-        }),
-      ),
-      field(
-        t("stars"),
-        el("input", {
-          type: "text",
-          inputMode: "numeric",
-          pattern: "[0-9]*",
-          maxLength: 7,
-          value: item.pointAmount,
-          "aria-label": label + " " + t("stars"),
-          oninput: (e) => {
-            item.pointAmount = e.target.value;
-            persist();
-          },
-        }),
-      ),
-      button(t("remove"), remove, true, {
-        "aria-label": t("remove") + " " + label,
-      }),
-    );
-  edit.tasks.forEach((item, i) =>
-    card.append(
-      row(item, t("task") + " " + (i + 1), () => {
-        edit.tasks.splice(i, 1);
-        persist();
-        render();
-      }),
-    ),
-  );
-  if (edit.tasks.length < 3)
-    card.append(
-      button(
-        t("add"),
-        () => {
-          edit.tasks.push({ name: "", pointAmount: "5" });
-          persist();
-          render();
-        },
-        true,
-      ),
-    );
-  if (edit.reward)
-    card.append(
-      row(edit.reward, t("rewardName"), () => {
-        edit.reward = null;
-        persist();
-        render();
-      }),
-    );
-  else
-    card.append(
-      button(
-        "+ " + t("rewardName"),
-        () => {
-          edit.reward = { name: "", pointAmount: "20" };
-          persist();
-          render();
-        },
-        true,
-      ),
-    );
+  const selected = plan.items.filter((x) => x.state === "kept").length;
   card.append(
+    el(
+      "p",
+      { class: "selection-count", id: "selected-count" },
+      t("chosenCount").replace("{n}", selected),
+    ),
     el(
       "div",
       { class: "actions" },
-      button(t("save"), () => {
+      button(t("saveIdeas"), () => {
         try {
-          saveRoutine(localStorage, collect());
+          savePlan(localStorage, plan);
           message(t("savedOk"));
-        } catch (e) {
-          message(
-            t(
-              ["POINTS", "NAME", "TASK_COUNT"].includes(e.message)
-                ? "invalid"
-                : "storage",
-            ),
-          );
+        } catch {
+          message(t("storage"));
         }
       }),
+      button(t("exportSelected"), download, true, {
+        id: "export",
+        disabled: !selected,
+      }),
+    ),
+    el("p", { class: "muted" }, t("richExportInfo")),
+  );
+  const more = el(
+    "section",
+    { class: "card more-card" },
+    el("h2", {}, t("moreHeading")),
+    el("p", {}, t("moreInfo")),
+    field(
+      t("moreContext"),
+      el("textarea", {
+        id: "feedback",
+        rows: 3,
+        maxLength: 600,
+        value: feedback,
+        placeholder: t("moreHint"),
+        oninput: (e) => (feedback = e.target.value),
+      }),
+    ),
+    cloudControl(),
+    button(busy ? t("working") : t("moreIdeas"), () => suggest(true), false, {
+      id: "more-ideas",
+    }),
+  );
+  main.append(more);
+  if (!cloudConfigured) more.querySelector("#cloud").disabled = true;
+  if (busy)
+    more.append(
+      button(t("cancel"), () => controller?.abort(), true, { id: "cancel" }),
+    );
+}
+function itemCard(item) {
+  const node = el("article", {
+    class: "idea-card " + (item.state === "kept" ? "is-kept" : ""),
+    "data-item-id": item.id,
+    "data-kind": item.kind,
+  });
+  node.append(
+    el(
+      "div",
+      { class: "idea-top" },
+      el(
+        "span",
+        {
+          class: "idea-icon",
+          style: "color:" + colorHex[item.color],
+          "aria-hidden": "true",
+        },
+        emoji[item.icon],
+      ),
+      el("h3", {}, item.name || t("untitled")),
+    ),
+  );
+  node.append(
+    el("p", { class: "idea-description" }, item.description),
+    el(
+      "p",
+      { class: "idea-meta" },
+      String(item.pointAmount) +
+        " " +
+        t("stars") +
+        " · " +
+        t("freq_" + item.limitType),
+    ),
+    el(
+      "div",
+      { class: "actions" },
       button(
-        t("export"),
+        item.state === "kept" ? "✓ " + t("kept") : t("keep"),
         () => {
-          let json;
+          item.state = item.state === "kept" ? "suggested" : "kept";
+          persist();
+          render();
+        },
+        item.state !== "kept",
+        { "aria-pressed": item.state === "kept", "data-action": "keep" },
+      ),
+      button(
+        t("discard"),
+        () => {
           try {
-            json = exportRoutine(collect());
+            plan = discardItem(plan, item.id);
+            persist();
+            render();
           } catch {
-            message(t("invalid"));
-            return;
-          }
-          try {
-            const url = URL.createObjectURL(
-              new Blob([json], { type: "application/json" }),
-            );
-            const a = el("a", { href: url, download: "starjar-routine.json" });
-            document.body.append(a);
-            a.click();
-            a.remove();
-            setTimeout(() => URL.revokeObjectURL(url), 30000);
-            message(t("exported"));
-          } catch {
-            message(t("exportFail"));
+            message(t("planFull"));
           }
         },
         true,
+        { "data-action": "discard" },
       ),
     ),
-    el("p", { class: "muted" }, t("exportInfo")),
   );
+  const details = el(
+    "details",
+    {
+      open: expanded.has(item.id),
+      ontoggle: (e) => {
+        if (!e.target.isConnected) return;
+        if (e.target.open) expanded.add(item.id);
+        else expanded.delete(item.id);
+      },
+    },
+    el("summary", {}, t("editDetails")),
+  );
+  node.append(details);
+  const update = (k, v) => {
+    item[k] = v;
+    persist();
+    node.querySelector("h3").textContent = item.name || t("untitled");
+    node.querySelector(".idea-description").textContent = item.description;
+    node.querySelector(".idea-meta").textContent =
+      String(item.pointAmount) +
+      " " +
+      t("stars") +
+      " · " +
+      t("freq_" + item.limitType);
+  };
+  details.append(
+    field(
+      t("itemName"),
+      el("input", {
+        value: item.name,
+        maxLength: 120,
+        "aria-label": t("itemName"),
+        oninput: (e) => update("name", e.target.value),
+      }),
+    ),
+    field(
+      t("description"),
+      el("textarea", {
+        value: item.description,
+        rows: 2,
+        maxLength: 2000,
+        "aria-label": t("description"),
+        oninput: (e) => update("description", e.target.value),
+      }),
+    ),
+    el(
+      "div",
+      { class: "options" },
+      field(
+        t("stars"),
+        el("input", {
+          value: item.pointAmount,
+          inputMode: "numeric",
+          maxLength: 7,
+          "aria-label": t("stars"),
+          oninput: (e) => update("pointAmount", e.target.value),
+        }),
+      ),
+      field(
+        t("icon"),
+        select(
+          item.icon,
+          icons,
+          (v) => {
+            update("icon", v);
+            render();
+          },
+          "icon-" + item.id,
+          (v) => emoji[v] + " " + t("icon_" + v),
+        ),
+      ),
+      field(
+        t("color"),
+        select(
+          item.color,
+          colors,
+          (v) => {
+            update("color", v);
+            render();
+          },
+          "color-" + item.id,
+          (v) => t("color_" + v),
+        ),
+      ),
+    ),
+    el(
+      "div",
+      { class: "options" },
+      field(
+        t("frequency"),
+        select(
+          item.limitType,
+          frequencies,
+          (v) => {
+            update("limitType", v);
+            render();
+          },
+          "frequency-" + item.id,
+          (v) => t("freq_" + v),
+        ),
+      ),
+      field(
+        t("frequencyCount"),
+        el("input", {
+          value: item.limitValue,
+          inputMode: "numeric",
+          maxLength: 5,
+          "aria-label": t("frequencyCount"),
+          oninput: (e) => update("limitValue", e.target.value),
+        }),
+      ),
+    ),
+    checkbox(
+      t("parentApproval"),
+      item.requireApproval,
+      (v) => update("requireApproval", v),
+      "approval-" + item.id,
+    ),
+  );
+  return node;
+}
+function download() {
+  let json;
+  try {
+    json = exportPlan(plan);
+  } catch (e) {
+    message(
+      t(
+        e.message === "DUPLICATE"
+          ? "duplicate"
+          : e.message === "SELECTION"
+            ? "chooseFirst"
+            : "invalid",
+      ),
+    );
+    return;
+  }
+  const url = URL.createObjectURL(
+    new Blob([json], { type: "application/json" }),
+  );
+  const a = el("a", { href: url, download: "starjar-routine.json" });
+  document.body.append(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+  message(t("exported"));
 }
 function renderSaved(main) {
-  const card = el("section", { class: "card" });
+  const card = el("section", { class: "card" }, el("h1", {}, t("saved")));
   main.append(card);
-  card.append(el("h1", {}, t("saved")));
   let values;
   try {
-    values = readSaved(localStorage);
+    values = loadPlans(localStorage);
   } catch {
     card.append(el("p", {}, t("storage")));
     return;
   }
   if (!values.length) card.append(el("p", {}, t("empty")));
-  for (const r of values)
+  for (const p of values)
     card.append(
       el(
         "article",
         { class: "saved-item" },
-        el("h2", {}, r.title),
-        el("p", {}, r.tasks.map((x) => x.name).join(" · ")),
+        el("h2", {}, p.title),
+        el(
+          "p",
+          {},
+          t("chosenCount").replace(
+            "{n}",
+            p.items.filter((x) => x.state === "kept").length,
+          ),
+        ),
         el(
           "div",
           { class: "actions" },
           button(
             t("open"),
             () => {
-              if (edit && edit.id !== r.id && !confirm(t("newConfirm"))) return;
-              edit = {
-                ...r,
-                tasks: r.tasks.map((x) => ({
-                  ...x,
-                  pointAmount: String(x.pointAmount),
-                })),
-                reward: r.reward
-                  ? { ...r.reward, pointAmount: String(r.reward.pointAmount) }
-                  : null,
+              if (plan && plan.id !== p.id && !confirm(t("newConfirm"))) return;
+              plan = p;
+              input = {
+                goal: "",
+                ageBand: "unspecified",
+                minutes: "",
+                constraints: [],
               };
-              receipt = { source: "REVIEWED" };
-              input.goal = "";
-              planReason = "";
               feedback = "";
+              reason = "";
+              receipt = null;
               screen = "edit";
               persist();
               render();
@@ -757,8 +829,13 @@ function renderSaved(main) {
             () => {
               if (!confirm(t("confirm"))) return;
               try {
-                deleteRoutine(localStorage, r.id);
-                status = t("deleted");
+                deletePlan(localStorage, p.id);
+                if (plan?.id === p.id) {
+                  plan = null;
+                  localStorage.removeItem("routine-draft-v2");
+                  localStorage.removeItem("routine-draft-v1");
+                }
+                message(t("deleted"));
                 render();
               } catch {
                 message(t("storage"));
@@ -772,20 +849,7 @@ function renderSaved(main) {
 }
 restore();
 render();
-capability().then((value) => {
-  availability = value;
-  const label = $("capability");
-  if (label)
-    label.textContent = t(
-      value === "available"
-        ? "ready"
-        : value === "downloadable" || value === "downloading"
-          ? "download"
-          : "unavailable",
-    );
-});
 window.addEventListener("online", render);
 window.addEventListener("offline", render);
-// Build-time generated worker caches only the bundled app, never cloud traffic, tokens or prompts.
 if (import.meta.env.PROD && "serviceWorker" in navigator)
   navigator.serviceWorker.register("./sw.js").catch(() => {});

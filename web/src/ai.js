@@ -14,6 +14,14 @@ import {
 } from "firebase/ai";
 import instructions from "../../androidApp/src/main/assets/routine-instructions.txt?raw";
 import planningInstructions from "./planning-instructions.txt?raw";
+import parentInstructions from "./parent-instructions.txt?raw";
+import {
+  validateParentRequest,
+  parseSuggestions,
+  icons,
+  colors,
+  frequencies,
+} from "./parent-plan.js";
 import { request, draft } from "./core.js";
 const env = import.meta.env;
 export const cloudConfigured = Boolean(
@@ -76,7 +84,7 @@ export async function generate(
   r,
   { cloudAllowed = false, signal, onProgress = () => {} } = {},
 ) {
-  request(r);
+  r.parentPlanning ? validateParentRequest(r) : request(r);
   if (signal?.aborted) throw Error("CANCELLED");
   const properties = {
     tasks: Schema.array({
@@ -92,7 +100,27 @@ export async function generate(
         "One brief sentence explaining the choice, at most 160 characters.",
     });
   if (r.includeReward) properties.reward = Schema.string();
-  const schema = Schema.object({ properties });
+  const itemSchema = Schema.object({
+    properties: {
+      name: Schema.string(),
+      description: Schema.string(),
+      pointAmount: Schema.integer(),
+      icon: Schema.enumString({ enum: icons }),
+      color: Schema.enumString({ enum: colors }),
+      limitType: Schema.enumString({ enum: frequencies }),
+      limitValue: Schema.integer(),
+      requireApproval: Schema.boolean(),
+    },
+  });
+  const schema = r.parentPlanning
+    ? Schema.object({
+        properties: {
+          tasks: Schema.array({ items: itemSchema, maxItems: 6 }),
+          rewards: Schema.array({ items: itemSchema, maxItems: 3 }),
+          reason: Schema.string(),
+        },
+      })
+    : Schema.object({ properties });
   // A slow browser capability probe must not indefinitely block an approved fallback.
   const localReady = cloudAllowed
     ? (await capability()) === "available"
@@ -112,7 +140,7 @@ export async function generate(
       model: "gemini-3.5-flash-lite",
       generationConfig: {
         temperature: 0.2,
-        maxOutputTokens: r.planning ? 512 : 256,
+        maxOutputTokens: r.parentPlanning ? 2048 : r.planning ? 512 : 256,
         responseMimeType: "application/json",
         responseSchema: schema,
       },
@@ -128,7 +156,11 @@ export async function generate(
   const start = performance.now();
   const response = (
     await model.generateContent(
-      (r.planning ? planningInstructions : instructions) +
+      (r.parentPlanning
+        ? parentInstructions
+        : r.planning
+          ? planningInstructions
+          : instructions) +
         "\nREQUEST_DATA:\n" +
         JSON.stringify(r) +
         "\nOUTPUT LANGUAGE: " +
@@ -149,7 +181,9 @@ export async function generate(
   if (!cloudAllowed && response.inferenceSource !== InferenceSource.ON_DEVICE)
     throw Error("SOURCE");
   return {
-    draft: draft(JSON.parse(response.text()), r),
+    draft: r.parentPlanning
+      ? parseSuggestions(JSON.parse(response.text()))
+      : draft(JSON.parse(response.text()), r),
     receipt: {
       source:
         response.inferenceSource === InferenceSource.ON_DEVICE

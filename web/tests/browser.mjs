@@ -1,8 +1,8 @@
 import { chromium } from "@playwright/test";
 import fs from "node:fs";
-import { spawn } from "node:child_process";
 import path from "node:path";
-const out = process.env.ROUTINE_EVIDENCE || "/tmp/routine-web-evidence";
+import { spawn } from "node:child_process";
+const out = process.env.ROUTINE_EVIDENCE || "/tmp/routine-parent-browser";
 fs.mkdirSync(out, { recursive: true });
 const server = spawn(
   process.execPath,
@@ -19,29 +19,17 @@ const server = spawn(
 );
 let browser;
 const checks = [];
-function ok(value, label) {
-  if (!value) throw Error(label);
+const ok = (v, label) => {
+  if (!v) throw Error(label);
   checks.push(label);
-}
+};
 try {
-  for (let i = 0; i < 50; i++) {
-    try {
-      await fetch("http://127.0.0.1:8795");
-      break;
-    } catch {
-      await new Promise((r) => setTimeout(r, 100));
-    }
-  }
-  browser = await chromium.launch({
-    ...(process.env.ROUTINE_CHROME_PATH
-        ? { executablePath: process.env.ROUTINE_CHROME_PATH }
-        : { channel: "chrome" }),
-    headless: true,
-  });
-  for (const language of ["en", "de"]) {
-    const de = language === "de";
+  await new Promise((r) => setTimeout(r, 500));
+  browser = await chromium.launch({ channel: "chrome", headless: true });
+  for (const lang of ["en", "de"]) {
+    const de = lang === "de";
     const context = await browser.newContext({
-      locale: language,
+      locale: lang,
       acceptDownloads: true,
       viewport: { width: 1100, height: 950 },
     });
@@ -51,35 +39,60 @@ try {
     await page.goto("http://127.0.0.1:8795");
     await page.locator("#age").check();
     await page.locator("#start").click();
+    ok(
+      (await page.locator("#count").count()) === 0,
+      lang + " no task count selector",
+    );
+    await page.screenshot({
+      path: path.join(out, lang + "-create.png"),
+      fullPage: true,
+    });
     await page
       .getByRole("button", {
         name: de ? "Selbst schreiben" : "Write my own",
         exact: true,
       })
       .click();
-    await page.locator("#title").fill(de ? "Mein Morgen" : "My morning");
-    const tasks = de
-      ? ["Zähne putzen", "Schultasche packen", "Schuhe anziehen"]
-      : ["Brush teeth", "Pack schoolbag", "Put on shoes"];
-    for (let i = 0; i < 3; i++)
-      await page
-        .getByRole("textbox", {
-          name: (de ? "Aufgabe" : "Task") + " " + (i + 1),
-          exact: true,
-        })
-        .fill(tasks[i]);
-    await page
-      .getByRole("textbox", { name: de ? "Belohnung" : "Reward", exact: true })
-      .fill(de ? "Gemeinsam lesen" : "Read together");
-    await page
-      .getByRole("textbox", {
-        name: de ? "Aufgabe 1 Sterne" : "Task 1 Stars",
-        exact: true,
-      })
-      .fill("7");
+    await page.locator("#title").fill(de ? "Unser Morgen" : "Our morning");
+    const task = page.locator('[data-kind="task"]').first();
+    await task.locator("summary").click();
+    await task
+      .getByLabel("Name", { exact: true })
+      .fill(de ? "Kleidung auswählen" : "Choose clothes");
+    await task
+      .getByLabel(de ? "Beschreibung" : "Description", { exact: true })
+      .fill(
+        de
+          ? "Wähle gemeinsam eines von zwei Outfits."
+          : "Choose between two outfits together.",
+      );
+    await task.getByLabel(de ? "Sterne" : "Stars", { exact: true }).fill("7");
+    await task.locator('select[id^="frequency-"]').selectOption("DAILY");
     await page
       .getByRole("button", {
-        name: de ? "Routine speichern" : "Save routine",
+        name: de ? "+ Eigene Belohnung hinzufügen" : "+ Add my own reward",
+        exact: true,
+      })
+      .click();
+    const reward = page.locator('[data-kind="reward"]').first();
+    await reward.locator("summary").click();
+    await reward
+      .getByLabel("Name", { exact: true })
+      .fill(de ? "Spiel auswählen" : "Choose a game");
+    await reward
+      .getByLabel(de ? "Beschreibung" : "Description", { exact: true })
+      .fill(
+        de
+          ? "Wähle ein Spiel für die gemeinsame Spielzeit."
+          : "Choose a game for our shared playtime.",
+      );
+    await reward
+      .getByLabel(de ? "Sterne" : "Stars", { exact: true })
+      .fill("20");
+    await reward.locator('[data-action="keep"]').click();
+    await page
+      .getByRole("button", {
+        name: de ? "Ideen speichern" : "Save ideas",
         exact: true,
       })
       .click();
@@ -87,55 +100,62 @@ try {
       (await page.locator("#status").innerText()).includes(
         de ? "gespeichert" : "saved",
       ),
-      language + " saved",
+      lang + " saved",
     );
-    const dp = page.waitForEvent("download");
+    let dp = page.waitForEvent("download");
+    await page.locator("#export").click();
+    await (await dp).saveAs(path.join(out, lang + "-task-only.json"));
+    let json = JSON.parse(
+      fs.readFileSync(path.join(out, lang + "-task-only.json")),
+    );
+    ok(
+      json.tasks.length === 1 && json.rewards.length === 0,
+      lang + " only kept exported",
+    );
+    await reward.locator('[data-action="keep"]').click();
+    dp = page.waitForEvent("download");
+    await page.locator("#export").click();
+    await (await dp).saveAs(path.join(out, lang + "-rich-export.json"));
+    json = JSON.parse(
+      fs.readFileSync(path.join(out, lang + "-rich-export.json")),
+    );
+    ok(
+      json.tasks[0].pointAmount === 7 &&
+        json.tasks[0].limitType === "DAILY" &&
+        json.tasks[0].description.length > 0 &&
+        json.tasks[0].requireApproval === true &&
+        json.rewards.length === 1,
+      lang + " rich actual JSON download",
+    );
     await page
       .getByRole("button", {
-        name: de ? "Für StarJar exportieren" : "Export to StarJar",
+        name: de ? "Ideen speichern" : "Save ideas",
         exact: true,
       })
       .click();
-    await (await dp).saveAs(path.join(out, language + "-export.json"));
-    const exported = JSON.parse(
-      fs.readFileSync(path.join(out, language + "-export.json")),
-    );
-    ok(
-      exported.tasks[0].pointAmount === 7 &&
-        exported.format === "starjar-templates" &&
-        exported.tasks.length === 3,
-      language + " real JSON download",
-    );
+    for (const d of await page.locator(".idea-card details[open]").all())
+      await d.locator("summary").click();
     await page.screenshot({
-      path: path.join(out, language + "-desktop-editor.png"),
+      path: path.join(out, lang + "-selection.png"),
       fullPage: true,
     });
-    await page.setViewportSize({ width: 320, height: 640 });
+    await page.setViewportSize({ width: 320, height: 900 });
     ok(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
-      language + " narrow layout",
+      lang + " narrow layout",
     );
-    await page.setViewportSize({
-      width: 320,
-      height: 900,
-    });
-    await page.locator("#title").scrollIntoViewIfNeeded();
-    await page.waitForTimeout(200);
-    await page.screenshot({
-      path: path.join(out, language + "-phone-editor.png"),
-    });
+    await page.waitForTimeout(100);
+    await page.screenshot({ path: path.join(out, lang + "-phone.png") });
     await page.emulateMedia({ colorScheme: "dark" });
-    await page.screenshot({
-      path: path.join(out, language + "-phone-dark.png"),
-    });
+    await page.screenshot({ path: path.join(out, lang + "-dark.png") });
     await page.addStyleTag({ content: "body{font-size:32px}" });
     ok(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
-      language + " enlarged text no horizontal overflow",
+      lang + " 200 percent text",
     );
     await page.evaluate(async () => {
       await navigator.serviceWorker.ready;
@@ -150,9 +170,10 @@ try {
     await context.setOffline(true);
     await page.reload();
     ok(
-      (await page.locator("#title").inputValue()) ===
-        (de ? "Mein Morgen" : "My morning"),
-      language + " offline reload restores draft",
+      (await page
+        .locator('[data-kind="task"] [aria-pressed="true"]')
+        .count()) === 1,
+      lang + " kept state restored offline",
     );
     await page
       .getByRole("button", {
@@ -165,14 +186,17 @@ try {
       .click();
     ok(
       (await page
-        .getByRole("textbox", {
-          name: (de ? "Aufgabe" : "Task") + " 1",
-          exact: true,
-        })
-        .inputValue()) === tasks[0],
-      language + " saved reopen offline",
+        .locator('[data-kind="reward"] [aria-pressed="true"]')
+        .count()) === 1,
+      lang + " saved reward restored",
     );
-    ok(errors.length === 0, language + " no browser errors");
+    await page.locator('[data-kind="reward"] [data-action="discard"]').click();
+    await page.reload();
+    ok(
+      (await page.locator('[data-kind="reward"]').count()) === 0,
+      lang + " discarded stays removed",
+    );
+    ok(errors.length === 0, lang + " no browser errors");
     await context.close();
   }
   fs.writeFileSync(

@@ -1,6 +1,6 @@
 # Chrome companion
 
-Browser application for creating, reviewing, saving and exporting everyday routines. See [licences](../NOTICE) for the reused artwork and fonts.
+Browser application for parents to find, review, save and export tasks and rewards for their children. See [licences](../NOTICE) for the reused artwork and fonts.
 
 ## Run locally
 
@@ -31,16 +31,20 @@ The web app has no client request counter. Configure server quotas and billing c
 
 - `npm test`: request/output validation, strict stars, export allowlist, persistence and cancellation.
 - `node tests/browser.mjs`: built app in isolated installed Chrome; EN/DE real downloads, saving, narrow layouts, offline reload/reopen. `ROUTINE_EVIDENCE` selects the output folder.
-- `node tests/local-live.mjs`: opt-in real model test. Uses an isolated `/tmp/routine-web-model-profile` (override `ROUTINE_CHROME_PROFILE`), may download several GB. Checks EN generation and DE generation after an offline reload. No paid cloud call.
+- `node tests/local-live.mjs`: opt-in real model test. Uses an isolated `/tmp/routine-parent-local-test-profile` (override `ROUTINE_CHROME_PROFILE`), may download several GB. Checks generation and adding ideas while offline, preserving existing cards. No paid cloud call.
 
-- `node tests/cloud-live.mjs`: opt-in real cloud request using your configured Firebase project. This can incur charges. It checks the App Check header and actual cloud inference source.
+- `node tests/cloud-live.mjs`: opt-in real cloud requests using your configured Firebase project. This can incur charges. It checks the App Check header and actual cloud inference source.
 
 Synthetic recovery tests do not exercise real models. Run live tests explicitly using synthetic, non-personal descriptions.
 
 Browser tests use an installed Google Chrome. Set `ROUTINE_CHROME_PATH` to use a custom browser executable.
 
-## Planning a routine
+## Planning for your child
 
-Describe a difficulty rather than supplying a ready-made task list. Optionally enter the time available (1–180 minutes). The app suggests a short sequence and explains its choice. Use “What would you change?” to revise the current edited draft while keeping the original goal and time constraint. Timing is a suggestion, not a guarantee.
+Describe what is difficult and what already works. Optionally give a broad age range and the time available (1–180 minutes). The app suggests task and reward alternatives; there is no fixed task-count selector. Purchase-free and screen-free reward preferences are optional.
 
-The goal, time and revision feedback remain in memory for the current page session. Reloading restores the edited routine, but not that private conversation context. Exports remain compatible with StarJar: task/reward names and star amounts only.
+Keep, edit or discard each card. Asking for more ideas sends your additional context, current cards and discarded names. Existing cards and selections stay unchanged. Exact-name repeats are filtered locally; semantic duplicates can still occur and need review.
+
+Only kept items are exported: names, descriptions, stars, icons, colours, frequency limits and approval settings, in StarJar's version-1 template format. Badges, reminders and streak bonuses are not generated. Import through StarJar's template library; direct app-to-app transfer is not implemented.
+
+The original goal, age, time and follow-up feedback remain in memory for the current page session. Edited cards, kept choices and discarded names are stored locally. Reloading restores the draft but not the conversation context. Existing version-1 browser drafts and saved routines are migrated when opened; their original records remain until explicitly replaced or deleted.

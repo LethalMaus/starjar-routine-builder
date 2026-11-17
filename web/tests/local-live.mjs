@@ -1,8 +1,9 @@
-// Opt-in real Firebase on-device test. Dedicated profile; no personal Chrome data.
+// Opt-in real on-device test. Use a dedicated test profile; model download may take several GB.
 import { chromium } from "@playwright/test";
 import fs from "node:fs";
 import { spawn } from "node:child_process";
-const out = process.env.ROUTINE_EVIDENCE || "/tmp/routine-web-evidence";
+const out =
+  process.env.ROUTINE_EVIDENCE || "/tmp/routine-parent-local-evidence";
 fs.mkdirSync(out, { recursive: true });
 const server = spawn(
   process.execPath,
@@ -12,22 +13,24 @@ const server = spawn(
     "--host",
     "127.0.0.1",
     "--port",
-    "8796",
+    "8806",
     "--strictPort",
   ],
   { stdio: "ignore" },
 );
 let context;
+const result = { at: new Date().toISOString() };
 try {
-  await new Promise((r) => setTimeout(r, 700));
+  await new Promise((r) => setTimeout(r, 500));
   context = await chromium.launchPersistentContext(
-    process.env.ROUTINE_CHROME_PROFILE || "/tmp/routine-web-model-profile",
+    process.env.ROUTINE_CHROME_PROFILE ||
+      "/tmp/routine-parent-local-test-profile",
     {
       ...(process.env.ROUTINE_CHROME_PATH
         ? { executablePath: process.env.ROUTINE_CHROME_PATH }
         : { channel: "chrome" }),
       headless: true,
-      locale: "en-GB",
+      locale: "en",
       ignoreDefaultArgs: [
         "--disable-component-update",
         "--disable-background-networking",
@@ -40,124 +43,105 @@ try {
   );
   const page = await context.newPage();
   page.on("console", (m) => {
-    if (m.text().startsWith("Routine generation code:")) console.log(m.text());
+    if (m.text().startsWith("Routine generation code:")) {
+      result.errorCode = m.text();
+      console.log(m.text());
+    }
   });
-  await page.goto("http://127.0.0.1:8796");
-  // Refresh the previous task-only service worker to the build under test.
+  await page.goto("http://127.0.0.1:8806");
   await page.evaluate(async () => {
     for (const r of await navigator.serviceWorker.getRegistrations())
       await r.unregister();
     for (const k of await caches.keys()) await caches.delete(k);
+    localStorage.clear();
   });
   await page.reload();
-  console.log(
-    "capability",
-    await page.evaluate(async () => ({
-      agent: navigator.userAgent,
-      exposed: typeof LanguageModel,
-      availability:
-        typeof LanguageModel === "undefined"
-          ? "unavailable"
-          : await LanguageModel.availability(),
-    })),
-  );
-  if (await page.locator("#age").count()) {
-    await page.locator("#age").check();
-    await page.locator("#start").click();
-  }
-  page.on("dialog", (d) => d.accept());
-  await page
-    .getByRole("button", { name: "Create a routine", exact: true })
-    .click();
+  await page.locator("#age").check();
+  await page.locator("#start").click();
   await page
     .locator("#goal")
-    .fill("Morning: brush teeth, pack schoolbag, put on shoes");
+    .fill(
+      "Getting out of bed is difficult for a primary-school child. Dressing is fine. They enjoy music and games.",
+    );
+  await page.locator("#age-band").selectOption("primary");
+  await page.locator("#minutes").fill("20");
   await page
-    .getByRole("button", { name: "Suggest a routine", exact: true })
+    .getByRole("button", { name: "Find tasks and rewards", exact: true })
     .click();
   for (let i = 0; i < 120; i++) {
     await page.waitForTimeout(5000);
-    if (await page.locator("#receipt").count()) break;
-    const status = await page.locator("#status").innerText();
-    if (i % 6 === 0) console.log("local preparation", status);
+    if (await page.locator("#selected-count").count()) break;
+    if (i % 6 === 0)
+      console.log(
+        "Local preparation:",
+        await page.locator("#status").innerText(),
+      );
     if (
-      !(await page
-        .getByRole("button", { name: "Creating suggestions…", exact: true })
-        .count())
+      await page
+        .getByRole("button", { name: "Find tasks and rewards", exact: true })
+        .count()
     )
-      throw Error(status);
+      throw Error(await page.locator("#status").innerText());
   }
-  await page.locator("#receipt").waitFor({ timeout: 1000 });
-  const first = await page.locator("#receipt").innerText();
-  if (!first.startsWith("Generated on this device")) throw Error(first);
-  console.log("local", first);
-  await page.screenshot({
-    path: out + "/en-local-generated.png",
-    fullPage: true,
-  });
-  await page.evaluate(async () => {
-    await navigator.serviceWorker.ready;
-  });
+  await page.locator("#selected-count").waitFor({ timeout: 1000 });
+  result.receipt = await page.locator("#receipt").innerText();
+  if (!result.receipt.startsWith("Generated on this device"))
+    throw Error("Not local");
+  result.plan = await page.evaluate(
+    () => JSON.parse(localStorage.getItem("routine-draft-v2")).plan,
+  );
+  await page.screenshot({ path: out + "/local-options.png", fullPage: true });
   await context.setOffline(true);
-  await page.reload();
   await page
-    .getByRole("button", { name: "Create a routine", exact: true })
-    .click();
-  await page.locator("#language").selectOption("de");
-  await page
-    .locator("#goal")
-    .fill("Abends: Spielzeug aufräumen, Schlafanzug anziehen, Buch lesen");
-  await page
-    .getByRole("button", { name: "Routine vorschlagen", exact: true })
-    .click();
-  await page.locator("#receipt").waitFor({ timeout: 120000 });
-  const second = await page.locator("#receipt").innerText();
-  if (!second.startsWith("Auf diesem Gerät erstellt")) throw Error(second);
-  await page.screenshot({
-    path: out + "/de-offline-local-generated.png",
-    fullPage: true,
-  });
-  const values = await page
-    .locator(".item input")
-    .evaluateAll((nodes) => nodes.map((n) => n.value));
-  const savedReceipt = await page.evaluate(
-    () => JSON.parse(localStorage.getItem("routine-draft-v1")).receipt,
+    .locator("#feedback")
+    .fill("Suggest a different reward involving choosing a shared game.");
+  await page.locator("#more-ideas").click();
+  await page.waitForFunction(
+    () => !document.getElementById("more-ideas").disabled,
+    {},
+    { timeout: 180000 },
   );
-  await page
-    .getByRole("button", { name: "Routine erstellen", exact: true })
-    .click();
-  await page
-    .locator("#goal")
-    .fill("Zähne putzen, Tasche packen, Schuhe anziehen");
-  await page
-    .getByRole("button", { name: "Routine vorschlagen", exact: true })
-    .click();
-  await page.getByRole("button", { name: "Abbrechen", exact: true }).click();
-  await page
-    .getByRole("button", { name: "Selbst schreiben", exact: true })
-    .click();
-  await page.locator("#title").fill("Nach Abbruch behalten");
-  await page.waitForTimeout(5000);
-  if ((await page.locator("#title").inputValue()) !== "Nach Abbruch behalten")
-    throw Error("Late result replaced edits");
-  fs.writeFileSync(
-    out + "/local-live.json",
-    JSON.stringify(
-      {
-        at: new Date().toISOString(),
-        first,
-        second,
-        germanOfflineValues: values,
-        savedReceipt,
-        cancelPreservedNewEdits: true,
-        offlineReload: true,
-      },
-      null,
-      2,
-    ),
+  if ((await page.locator("#status").innerText()).includes("wrong"))
+    throw Error(await page.locator("#status").innerText());
+  result.offlinePlan = await page.evaluate(
+    () => JSON.parse(localStorage.getItem("routine-draft-v2")).plan,
   );
-  console.log("offline local passed", second);
+  if (result.offlinePlan.items.length <= result.plan.items.length)
+    throw Error("No offline ideas added");
+  for (const item of result.plan.items) {
+    if (
+      JSON.stringify(item) !==
+      JSON.stringify(result.offlinePlan.items.find((x) => x.id === item.id))
+    )
+      throw Error("Existing idea changed offline");
+  }
+  if (
+    !(await page.locator("#receipt").innerText()).startsWith(
+      "Generated on this device",
+    )
+  )
+    throw Error("Expected local offline source");
+  result.pass = true;
+  console.log(
+    JSON.stringify({
+      pass: true,
+      receipt: result.receipt,
+      initial: result.plan.items.length,
+      offline: result.offlinePlan.items.length,
+    }),
+  );
+} catch (e) {
+  result.pass = false;
+  result.error = e.message;
+  console.log(
+    JSON.stringify({ pass: false, error: e.message, code: result.errorCode }),
+  );
+  process.exitCode = 1;
 } finally {
+  fs.writeFileSync(
+    out + "/local-results.json",
+    JSON.stringify(result, null, 2),
+  );
   await context?.close();
   server.kill();
 }
