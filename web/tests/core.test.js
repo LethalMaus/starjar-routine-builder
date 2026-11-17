@@ -138,3 +138,33 @@ test("timeout rejects and delayed failures are handled", async () => {
   fail(Error("late network error"));
   await Promise.resolve();
 });
+
+test("planning validates time, explanation and revision input without changing exports", () => {
+  const r = {
+    ...req,
+    planning: true,
+    availableMinutes: 20,
+    feedback: "No evening preparation",
+    currentTasks: ["Find keys"],
+    currentReward: null,
+  };
+  assert.equal(request(r), r);
+  assert.throws(() => request({ ...r, availableMinutes: -1 }), /TIME/);
+  assert.throws(() => request({ ...r, feedback: "x".repeat(601) }), /FEEDBACK/);
+  const result = draft(
+    {
+      tasks: ["Put keys by door", "Pack essentials", "Check departure time"],
+      reward: "Read",
+      reason: "Keep essentials together to reduce searching.",
+    },
+    r,
+  );
+  assert.ok(result.reason);
+  assert.throws(() => draft({ ...result, reason: "x".repeat(241) }, r), /NAME/);
+  const json = exportRoutine({
+    ...routine,
+    reason: result.reason,
+    feedback: r.feedback,
+  });
+  assert.ok(!json.includes("reason") && !json.includes("feedback"));
+});

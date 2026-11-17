@@ -13,6 +13,7 @@ import {
   Schema,
 } from "firebase/ai";
 import instructions from "../../androidApp/src/main/assets/routine-instructions.txt?raw";
+import planningInstructions from "./planning-instructions.txt?raw";
 import { request, draft } from "./core.js";
 const env = import.meta.env;
 export const cloudConfigured = Boolean(
@@ -78,8 +79,18 @@ export async function generate(
   request(r);
   if (signal?.aborted) throw Error("CANCELLED");
   const properties = {
-    tasks: Schema.array({ items: Schema.string(), maxItems: r.taskCount }),
+    tasks: Schema.array({
+      items: Schema.string({
+        description: "Short task name, at most 80 characters.",
+      }),
+      maxItems: r.taskCount,
+    }),
   };
+  if (r.planning)
+    properties.reason = Schema.string({
+      description:
+        "One brief sentence explaining the choice, at most 160 characters.",
+    });
   if (r.includeReward) properties.reward = Schema.string();
   const schema = Schema.object({ properties });
   // A slow browser capability probe must not indefinitely block an approved fallback.
@@ -101,7 +112,7 @@ export async function generate(
       model: "gemini-3.5-flash-lite",
       generationConfig: {
         temperature: 0.2,
-        maxOutputTokens: 256,
+        maxOutputTokens: r.planning ? 512 : 256,
         responseMimeType: "application/json",
         responseSchema: schema,
       },
@@ -117,7 +128,7 @@ export async function generate(
   const start = performance.now();
   const response = (
     await model.generateContent(
-      instructions +
+      (r.planning ? planningInstructions : instructions) +
         "\nREQUEST_DATA:\n" +
         JSON.stringify(r) +
         "\nOUTPUT LANGUAGE: " +

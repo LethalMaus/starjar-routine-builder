@@ -23,7 +23,9 @@ let lang = navigator.language.startsWith("de") ? "de" : "en",
   status = "",
   availability = "unavailable",
   storageFailed = false;
-let input = { goal: "", count: 3, reward: true, constraints: [] };
+let input = { goal: "", count: 3, reward: true, constraints: [], minutes: "" };
+let planReason = "",
+  feedback = "";
 const t = (k) => strings[lang][k] ?? k;
 function el(tag, attrs = {}, ...children) {
   const node = document.createElement(tag);
@@ -113,6 +115,8 @@ function restore() {
 function fresh() {
   if (edit && !confirm(t("newConfirm"))) return;
   edit = null;
+  planReason = "";
+  feedback = "";
   receipt = null;
   status = "";
   screen = "create";
@@ -123,17 +127,23 @@ function fresh() {
   }
   render();
 }
-function editorFrom(draft) {
+function editorFrom(draft, previous = null) {
+  planReason = draft?.reason ?? "";
+  feedback = "";
   edit = {
-    id: crypto.randomUUID(),
-    title: t("draftTitle"),
-    language: lang,
+    id: previous?.id ?? crypto.randomUUID(),
+    title: previous?.title ?? t("draftTitle"),
+    language: previous?.language ?? lang,
     tasks: (draft?.tasks ?? Array(input.count).fill("")).map((name) => ({
       name,
-      pointAmount: "5",
+      pointAmount:
+        previous?.tasks.find((x) => x.name === name)?.pointAmount ?? "5",
     })),
-    reward: input.reward
-      ? { name: draft?.reward ?? "", pointAmount: "20" }
+    reward: (previous ? Boolean(previous.reward) : input.reward)
+      ? {
+          name: draft?.reward ?? "",
+          pointAmount: previous?.reward?.pointAmount ?? "20",
+        }
       : null,
   };
   screen = "edit";
@@ -259,7 +269,15 @@ function render() {
     main.append(el("p", { class: "notice" }, t("offline")));
   if (storageFailed) main.append(el("p", { class: "notice" }, t("storage")));
   if (screen === "create") renderCreate(main);
-  if (screen === "edit") renderEdit(main);
+  if (screen === "edit") {
+    renderEdit(main);
+    if (busy)
+      for (const control of main.querySelectorAll(
+        "input,textarea,select,button",
+      )) {
+        if (control.textContent !== t("cancel")) control.disabled = true;
+      }
+  }
   if (screen === "saved") renderSaved(main);
   main.append(el("footer", {}, t("adult"), " · ", t("draftSaved")));
 }
@@ -298,6 +316,23 @@ function renderCreate(main) {
       }),
     ),
     el("p", { class: "muted" }, t("privacy")),
+  );
+  form.append(
+    field(
+      t("minutes"),
+      el("input", {
+        id: "minutes",
+        type: "number",
+        min: 1,
+        max: 180,
+        value: input.minutes,
+        placeholder: "20",
+        disabled: busy,
+        oninput: (e) => {
+          input.minutes = e.target.value;
+        },
+      }),
+    ),
   );
   const options = el("div", { class: "options" });
   form.append(options);
@@ -412,14 +447,25 @@ function renderCreate(main) {
   if (busy)
     for (const e of form.querySelectorAll("input,select")) e.disabled = true;
 }
-async function startGeneration() {
+async function startGeneration(revise = false) {
   if (busy) return;
-  if (edit && !confirm(t("newConfirm"))) return;
+  if (!revise && edit && !confirm(t("newConfirm"))) return;
+  if (revise && !feedback.trim()) return;
+  const previous = revise ? structuredClone(edit) : null;
   const r = {
     goal: input.goal,
-    language: lang,
-    taskCount: input.count,
-    includeReward: input.reward,
+    planning: true,
+    availableMinutes: input.minutes === "" ? null : Number(input.minutes),
+    ...(revise
+      ? {
+          feedback: feedback.trim(),
+          currentTasks: edit.tasks.map((x) => x.name.trim()),
+          currentReward: edit.reward?.name.trim() ?? null,
+        }
+      : {}),
+    language: revise ? edit.language : lang,
+    taskCount: revise ? Math.max(1, edit.tasks.length) : input.count,
+    includeReward: revise ? Boolean(edit.reward) : input.reward,
     constraints: [...input.constraints],
   };
   controller = new AbortController();
@@ -443,7 +489,7 @@ async function startGeneration() {
     if (signal.aborted) return;
     receipt = result.receipt;
     status = "";
-    editorFrom(result.draft);
+    editorFrom(result.draft, previous);
   } catch (e) {
     // Only bounded diagnostic codes; never log descriptions or model output.
     const diagnostic = String(e.code || e.message || "unknown");
@@ -509,6 +555,33 @@ function renderEdit(main) {
       }),
     ),
   );
+  if (planReason)
+    card.append(el("p", { class: "notice", id: "plan-reason" }, planReason));
+  if (input.goal.trim()) {
+    card.append(
+      field(
+        t("feedback"),
+        el("textarea", {
+          id: "feedback",
+          maxLength: 600,
+          rows: 2,
+          value: feedback,
+          disabled: busy,
+          placeholder: t("feedbackHint"),
+          oninput: (e) => {
+            feedback = e.target.value;
+          },
+        }),
+      ),
+      button(
+        busy ? t("working") : t("revise"),
+        () => startGeneration(true),
+        true,
+        { disabled: busy },
+      ),
+    );
+    if (busy) card.append(button(t("cancel"), () => controller?.abort(), true));
+  }
   const row = (item, label, remove) =>
     el(
       "div",
@@ -670,6 +743,9 @@ function renderSaved(main) {
                   : null,
               };
               receipt = { source: "REVIEWED" };
+              input.goal = "";
+              planReason = "";
+              feedback = "";
               screen = "edit";
               persist();
               render();

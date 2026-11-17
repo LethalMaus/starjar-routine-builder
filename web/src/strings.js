@@ -162,3 +162,29 @@ export const strings = {
       "Der Download konnte nicht gestartet werden. Versuche es erneut.",
   },
 };
+
+Object.assign(strings.en, {
+  heading: "Make the day a little easier.",
+  intro:
+    "Tell us what is getting in the way. We’ll suggest a small routine you can try and adjust.",
+  goal: "What is difficult at the moment?",
+  placeholder:
+    "I keep leaving late because I can’t find my things in the morning.",
+  minutes: "How much time do you have? (minutes, optional)",
+  feedback: "What would you change?",
+  feedbackHint: "I can’t prepare anything the night before. Make this easier.",
+  revise: "Adjust this routine",
+});
+Object.assign(strings.de, {
+  heading: "Mach deinen Alltag etwas leichter.",
+  intro:
+    "Was steht dir im Weg? Wir schlagen einen kleinen Ablauf vor, den du ausprobieren und anpassen kannst.",
+  goal: "Was fällt dir im Moment schwer?",
+  placeholder:
+    "Ich komme morgens oft zu spät los, weil ich meine Sachen nicht finde.",
+  minutes: "Wie viel Zeit hast du? (Minuten, optional)",
+  feedback: "Was möchtest du ändern?",
+  feedbackHint:
+    "Am Vorabend kann ich nichts vorbereiten. Mach den Ablauf einfacher.",
+  revise: "Routine anpassen",
+});

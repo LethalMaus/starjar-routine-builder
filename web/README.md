@@ -23,7 +23,7 @@ Copy `.env.example` to ignored `.env.local`, using a dedicated Firebase web app 
 
 For localhost testing, use Firebase's supported debug provider: a private browser harness can set `self.FIREBASE_APPCHECK_DEBUG_TOKEN` **before loading the app**, and register that token in the Firebase console. Never commit, bundle, screenshot, or publish that value. Do not embed a shared debug token in a public build. For deployment, register the hosting domain with the real provider and test App Check on that domain.
 
-The cloud checkbox uses Firebase `PREFER_ON_DEVICE` when the local model is ready, otherwise `ONLY_IN_CLOUD` with `gemini-3.5-flash-lite`. A capability probe is bounded to three seconds so a stalled browser check cannot block an approved fallback. Unchecked uses `ONLY_ON_DEVICE`. Cloud failures do not silently bypass App Check. Output is validated before it reaches the editor. Both routes share Android's authoritative prompt asset. Cancellation attempts to abort transport and suppresses late results; already-sent requests can still run/bill server-side.
+The cloud checkbox uses Firebase `PREFER_ON_DEVICE` when the local model is ready, otherwise `ONLY_IN_CLOUD` with `gemini-3.5-flash-lite`. A capability probe is bounded to three seconds so a stalled browser check cannot block an approved fallback. Unchecked uses `ONLY_ON_DEVICE`. Cloud failures do not silently bypass App Check. Output is validated before it reaches the editor. The local and cloud routes share the same browser planning prompt. Cancellation attempts to abort transport and suppresses late results; already-sent requests can still run/bill server-side.
 
 The web app has no client request counter. Configure server quotas and billing controls for your deployment; see [usage limits](../docs/USAGE_POLICY.md).
 
@@ -38,3 +38,9 @@ The web app has no client request counter. Configure server quotas and billing c
 Synthetic recovery tests do not exercise real models. Run live tests explicitly using synthetic, non-personal descriptions.
 
 Browser tests use an installed Google Chrome. Set `ROUTINE_CHROME_PATH` to use a custom browser executable.
+
+## Planning a routine
+
+Describe a difficulty rather than supplying a ready-made task list. Optionally enter the time available (1–180 minutes). The app suggests a short sequence and explains its choice. Use “What would you change?” to revise the current edited draft while keeping the original goal and time constraint. Timing is a suggestion, not a guarantee.
+
+The goal, time and revision feedback remain in memory for the current page session. Reloading restores the edited routine, but not that private conversation context. Exports remain compatible with StarJar: task/reward names and star amounts only.

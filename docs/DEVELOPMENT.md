@@ -2,7 +2,7 @@
 
 ## Data flow
 
-A request contains a goal, output language, one to three tasks, optional reward and supported constraints. Both clients use `androidApp/src/main/assets/routine-instructions.txt` for generation. Firebase AI Logic provides local and cloud inference; the returned inference source determines the result label.
+A request contains a goal, output language, one to three tasks, optional reward and supported constraints. Android uses `androidApp/src/main/assets/routine-instructions.txt`. The browser planning flow uses `web/src/planning-instructions.txt` to turn a difficulty, optional time window and revision feedback into a small routine. Firebase AI Logic provides local and cloud inference; the returned inference source determines the result label.
 
 Generated names are validated before editing. Reviewed names and star amounts are validated again before saving/export. The export constructs a fresh allowlisted `starjar-templates` version-1 envelope, excluding local IDs, routine titles, original requests and generation metadata.
 

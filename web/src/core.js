@@ -33,6 +33,28 @@ export function request(r) {
       ),
     "CONSTRAINT",
   );
+  if (r.planning) {
+    check(
+      r.availableMinutes == null ||
+        (Number.isInteger(r.availableMinutes) &&
+          r.availableMinutes >= 1 &&
+          r.availableMinutes <= 180),
+      "TIME",
+    );
+    check(
+      r.feedback == null ||
+        (typeof r.feedback === "string" && r.feedback.length <= 600),
+      "FEEDBACK",
+    );
+    if (r.currentTasks) {
+      check(
+        Array.isArray(r.currentTasks) && r.currentTasks.length <= 3,
+        "TASK_COUNT",
+      );
+      r.currentTasks.forEach((s) => name(s));
+    }
+    if (r.currentReward != null) name(r.currentReward);
+  }
   return r;
 }
 export function draft(raw, r) {
@@ -40,7 +62,11 @@ export function draft(raw, r) {
   check(raw && typeof raw === "object" && !Array.isArray(raw), "RESPONSE");
   check(
     Object.keys(raw).every((k) =>
-      ["tasks", ...(r.includeReward ? ["reward"] : [])].includes(k),
+      [
+        "tasks",
+        ...(r.planning ? ["reason"] : []),
+        ...(r.includeReward ? ["reward"] : []),
+      ].includes(k),
     ),
     "RESPONSE",
   );
@@ -59,7 +85,18 @@ export function draft(raw, r) {
   const reward = r.includeReward
     ? name(typeof raw.reward === "string" ? raw.reward.trim() : raw.reward, 80)
     : null;
-  return { tasks, reward };
+  return {
+    tasks,
+    reward,
+    ...(r.planning
+      ? {
+          reason: name(
+            typeof raw.reason === "string" ? raw.reason.trim() : raw.reason,
+            240,
+          ),
+        }
+      : {}),
+  };
 }
 export function points(s) {
   check(
