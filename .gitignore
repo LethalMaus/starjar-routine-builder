@@ -1,0 +1,19 @@
+**/build/
+.gradle/
+.kotlin/
+local.properties
+firebase.local.properties
+google-services.json
+*.jks
+*.keystore
+*debug-token*
+.idea/
+signing.local.properties
+
+# Local project notes, review material and private operational records.
+.jc/
+.DS_Store
+node_modules/
+dist/
+.env*
+!.env.example

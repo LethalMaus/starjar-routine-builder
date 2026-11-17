@@ -1,0 +1,12 @@
+StarJar Starry and launcher artwork
+Copyright James Cullimore
+
+Licensed under Creative Commons Attribution 4.0 International (CC BY 4.0):
+https://creativecommons.org/licenses/by/4.0/
+Legal code: https://creativecommons.org/licenses/by/4.0/legalcode
+
+Scope: androidApp/src/main/res/drawable/starry.png and the launcher artwork
+listed in docs/ASSET_INVENTORY.json. Nunito and application code have separate
+licences. Attribution: “StarJar artwork by James Cullimore, CC BY 4.0”.
+Retain the licence link and indicate modifications when sharing adaptations.
+No trademark rights or endorsement are granted by this notice.

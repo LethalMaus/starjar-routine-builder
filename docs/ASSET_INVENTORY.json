@@ -1,0 +1,117 @@
+[
+  {
+    "path": "androidApp/src/main/res/drawable/ic_launcher_background.xml",
+    "sha256": "b7ddc4d2fd50560c9bdf6826f8aa353fe95388f86181338fb2e259092d649db8",
+    "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  },
+  {
+    "path": "androidApp/src/main/res/drawable/starry.png",
+    "sha256": "d369e4927de8d13a7ca9a804385b9fef74e1379159c884a7b47a2251530d841c",
+    "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  },
+  {
+    "path": "androidApp/src/main/res/drawable-v24/ic_launcher_foreground.xml",
+    "sha256": "181120fe4a6775db5d0d6c2bac7f6499bea4e79caf7fa36bf05f1dd07e3a2b8f",
+    "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  },
+  {
+    "path": "androidApp/src/main/res/font/nunito_italic_variablefont_wght.ttf",
+    "sha256": "42cffa3ac6693a6700e86ca39a161da1338af41f8c17f7c9440941f3f8af1e72",
+    "rights": "SIL OFL (Nunito)"
+  },
+  {
+    "path": "androidApp/src/main/res/font/nunito_variablefont_wght.ttf",
+    "sha256": "f2a6ab02dcefcf4c7481e92ffb49ad0c7bc7a19ccd18eb5d7d9f4e21211998c6",
+    "rights": "SIL OFL (Nunito)"
+  },
+  {
+    "path": "androidApp/src/main/res/mipmap-anydpi-v26/ic_launcher.xml",
+    "sha256": "9c3a7e0a6515c6e1a7ae834a9ae430311ebc3241f7b2e5e7f0460aa690709a7c",
+    "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  },
+  {
+    "path": "androidApp/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml",
+    "sha256": "9c3a7e0a6515c6e1a7ae834a9ae430311ebc3241f7b2e5e7f0460aa690709a7c",
+    "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  },
+  {
+    "path": "androidApp/src/main/res/mipmap-hdpi/ic_launcher.webp",
+    "sha256": "c8065e7e690692fadaff7dc5905c296362c9f636c42a265fdbb1fb334b7d830c",
+    "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  },
+  {
+    "path": "androidApp/src/main/res/mipmap-hdpi/ic_launcher_foreground.webp",
+    "sha256": "722841e279820176d82b5046300815a083d2dfa0865c7ec2b3fe35ad791dac89",
+    "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  },
+  {
+    "path": "androidApp/src/main/res/mipmap-hdpi/ic_launcher_round.webp",
+    "sha256": "6116b814432cac281b381cca58ea8f0a6f58f8c225e002ce74b45184dbefcab7",
+    "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  },
+  {
+    "path": "androidApp/src/main/res/mipmap-mdpi/ic_launcher.webp",
+    "sha256": "5f1514f70138b1730591c12023f672e56d410ed9786832ae18a6925e02b5ba40",
+    "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  },
+  {
+    "path": "androidApp/src/main/res/mipmap-mdpi/ic_launcher_foreground.webp",
+    "sha256": "8806f38c8b3cb7eb7a83a1701d70462225dda14b45b0e11ae00396cf149766ec",
+    "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  },
+  {
+    "path": "androidApp/src/main/res/mipmap-mdpi/ic_launcher_round.webp",
+    "sha256": "a7df291003a25e842505af1dd75b36e7770a534e442386298fc9ee18def966b7",
+    "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  },
+  {
+    "path": "androidApp/src/main/res/mipmap-xhdpi/ic_launcher.webp",
+    "sha256": "921dc9a450857e1563ea06ca201997f37f0578caf18d0d7525a3510b8133bdac",
+    "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  },
+  {
+    "path": "androidApp/src/main/res/mipmap-xhdpi/ic_launcher_foreground.webp",
+    "sha256": "57d84b85a96e33d692ff3ae847c6d7008606446b95dda8432b5e71c2789a5d6a",
+    "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  },
+  {
+    "path": "androidApp/src/main/res/mipmap-xhdpi/ic_launcher_round.webp",
+    "sha256": "282ba022aef02c807223ea84452262532cd0dd7296a2edfb6ef08b78eb74138e",
+    "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  },
+  {
+    "path": "androidApp/src/main/res/mipmap-xxhdpi/ic_launcher.webp",
+    "sha256": "9b2d44cf20215b28920beaf68083975de9dd18f8b20a862a71f4d43c81bebf0c",
+    "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  },
+  {
+    "path": "androidApp/src/main/res/mipmap-xxhdpi/ic_launcher_foreground.webp",
+    "sha256": "aa75958018c1e8c4b786acddd29ed7611b433510f9bd60145900a916c02db505",
+    "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  },
+  {
+    "path": "androidApp/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp",
+    "sha256": "d46e091c43250d0a78d0595b0b55c565d2bf9f9908c042719e198bbbe95ae65e",
+    "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  },
+  {
+    "path": "androidApp/src/main/res/mipmap-xxxhdpi/ic_launcher.webp",
+    "sha256": "3d132770d07378870af84981a1fe4f69efc57d9a6953181a6f0b8aee591c8e45",
+    "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  },
+  {
+    "path": "androidApp/src/main/res/mipmap-xxxhdpi/ic_launcher_foreground.webp",
+    "sha256": "d94ea7cc119a2453467ab31d2babdaa7b0515ad95e0c8a9a50174071f07b86de",
+    "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  },
+  {
+    "path": "androidApp/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp",
+    "sha256": "7f458c4bd4f330b43066de75796428f58213a057f51a946eaee6a8262b34a9f8",
+    "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  },
+  {
+    "path": "androidApp/src/main/res/values/ic_launcher_background.xml",
+    "sha256": "7b6f7672b3c7098e1cb73bec01cd9912560cc9b402b7a06c889fd09800ab8604",
+    "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  }
+]
