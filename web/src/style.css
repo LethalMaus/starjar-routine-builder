@@ -369,3 +369,81 @@ button + button {
     font-size: 19px;
   }
 }
+@font-face {
+  font-family: "Material Icons";
+  font-style: normal;
+  font-weight: 400;
+  src: url("./assets/material-icons.ttf") format("truetype");
+  font-display: block;
+}
+@font-face {
+  font-family: "Material Icons Outlined";
+  font-style: normal;
+  font-weight: 400;
+  src: url("./assets/material-icons-outlined.otf") format("opentype");
+  font-display: block;
+}
+.material-icon {
+  font-family: "Material Icons";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  display: inline-block;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+}
+.material-icon.outlined {
+  font-family: "Material Icons Outlined";
+}
+.icon-picker {
+  min-width: 0;
+  width: 100%;
+}
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+  gap: 6px;
+  max-height: 260px;
+  overflow: auto;
+  margin-top: 12px;
+}
+.icon-grid button {
+  padding: 10px;
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+}
+.icon-grid button[hidden] {
+  display: none;
+}
+.icon-grid button[aria-pressed="true"] {
+  background: #f8d523;
+  color: #20221b;
+}
+.badge-editor {
+  border: 1px solid #aaa;
+  border-radius: 12px;
+  padding: 14px;
+  margin: 12px 0;
+  min-width: 0;
+}
+.task-options {
+  border-top: 1px solid #ddd;
+  margin-top: 24px;
+  padding-top: 12px;
+}
+.feature-options {
+  margin: 20px 0;
+}
+.idea-options-summary {
+  font-size: 0.9rem;
+  color: var(--muted);
+}

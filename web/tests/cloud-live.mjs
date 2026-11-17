@@ -56,6 +56,13 @@ try {
     );
   await page.locator("#age-band").selectOption("primary");
   await page.locator("#minutes").fill("20");
+  if (process.env.ROUTINE_FULL_OPTIONS === "1") {
+    await page.getByText("StarJar options", { exact: true }).click();
+    await page.locator("#badge-count").fill("10");
+    for (const key of ["streaks", "reminders", "urgency"])
+      await page.locator("#optimise-" + key).check();
+  }
+
   await page.locator("#cloud").check();
   await page
     .getByRole("button", { name: "Find tasks and rewards", exact: true })
@@ -81,6 +88,13 @@ try {
     .locator(".idea-card")
     .filter({ has: page.locator('[aria-pressed="false"]') })
     .last();
+  if (
+    process.env.ROUTINE_FULL_OPTIONS === "1" &&
+    !result.initial.items
+      .filter((x) => x.kind === "task")
+      .every((x) => x.badges?.length === 10)
+  )
+    throw Error("Expected ten badges per task");
   result.discardedName = await discard.locator("h3").innerText();
   await discard.locator('[data-action="discard"]').click();
   result.before = await page.evaluate(

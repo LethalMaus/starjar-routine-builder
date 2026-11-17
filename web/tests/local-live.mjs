@@ -65,6 +65,7 @@ try {
     );
   await page.locator("#age-band").selectOption("primary");
   await page.locator("#minutes").fill("20");
+
   await page
     .getByRole("button", { name: "Find tasks and rewards", exact: true })
     .click();

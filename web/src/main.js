@@ -1,5 +1,8 @@
 import "./style.css";
 import starry from "../../androidApp/src/main/res/drawable/starry.png";
+import { taskOptionsEditor } from "./task-options-ui.js";
+import { featureChoices } from "./task-options.js";
+import { iconText } from "./icon-catalog.js";
 import { strings } from "./strings.js";
 import { generate, cloudConfigured } from "./ai.js";
 import { cancellable } from "./cancellation.js";
@@ -34,6 +37,13 @@ let lang = navigator.language.startsWith("de") ? "de" : "en",
   cloudAllowed = false,
   storageError = false;
 const expanded = new Set();
+let features = {
+  badgeCount: "",
+  frequency: true,
+  streaks: false,
+  reminders: false,
+  urgency: false,
+};
 let input = { goal: "", ageBand: "unspecified", minutes: "", constraints: [] };
 const t = (k) => strings[lang][k] ?? k;
 function el(tag, attrs = {}, ...children) {
@@ -347,6 +357,7 @@ function renderCreate(main) {
         ),
       ),
     ),
+    featureControls(),
     cloudControl(),
     el(
       "details",
@@ -386,6 +397,8 @@ async function suggest(more) {
     constraints: [...input.constraints],
     feedback: more ? feedback.trim() : "",
     ...contextFor(current),
+    features: featureChoices(features),
+    iconIds: icons,
   };
   controller = new AbortController();
   const signal = controller.signal;
@@ -425,9 +438,11 @@ async function suggest(more) {
       t(
         signal.aborted
           ? "cancelled"
-          : e.message === "NEEDS_INPUT"
-            ? "needs"
-            : "error",
+          : e.message === "ADVANCED_CLOUD"
+            ? "advancedCloud"
+            : e.message === "NEEDS_INPUT"
+              ? "needs"
+              : "error",
       ),
     );
   } finally {
@@ -436,19 +451,106 @@ async function suggest(more) {
     render();
   }
 }
-const emoji = {
-  Check: "✓",
-  Alarm: "⏰",
-  Bed: "🛏",
-  Brush: "🪥",
-  School: "🎒",
-  MenuBook: "📖",
-  Redeem: "🎁",
-  MusicNote: "♫",
-  SmartToy: "🧩",
-  Celebration: "🎉",
-  SelfImprovement: "☀",
-};
+function iconNode(id) {
+  if (id === "Dishwasher") {
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 24 24");
+    svg.setAttribute("class", "material-icon");
+    svg.setAttribute("aria-hidden", "true");
+    const p = document.createElementNS(svg.namespaceURI, "path");
+    p.setAttribute(
+      "d",
+      "M4 2H20V22H4Z M4 7H20 M7 4.5H7.2 M14 4.5H17 M7 18H17 M8 17C6 14 6 11 8 10 M12 17C10 14 10 11 12 10 M16 17C14 14 14 11 16 10",
+    );
+    p.setAttribute("fill", "none");
+    p.setAttribute("stroke", "currentColor");
+    p.setAttribute("stroke-width", "1.8");
+    p.setAttribute("stroke-linecap", "round");
+    p.setAttribute("stroke-linejoin", "round");
+    svg.append(p);
+    return svg;
+  }
+  return el(
+    "span",
+    {
+      class: "material-icon" + (id.endsWith("Outlined") ? " outlined" : ""),
+      "aria-hidden": "true",
+    },
+    iconText(id),
+  );
+}
+function iconPicker(item, update) {
+  const box = el(
+    "details",
+    { class: "icon-picker" },
+    el("summary", {}, t("icon") + ": " + iconLabel(item.icon)),
+  );
+  const search = el("input", {
+    type: "search",
+    placeholder: t("searchIcons"),
+    "aria-label": t("searchIcons"),
+  });
+  const grid = el("div", { class: "icon-grid" });
+  for (const id of icons) {
+    const b = button(
+      "",
+      () => {
+        update("icon", id);
+        render();
+      },
+      true,
+      {
+        "aria-label": iconLabel(id),
+        title: iconLabel(id),
+        "aria-pressed": id === item.icon,
+      },
+    );
+    b.append(iconNode(id));
+    b.dataset.search = (id + " " + iconLabel(id)).toLowerCase();
+    grid.append(b);
+  }
+  search.oninput = () => {
+    for (const b of grid.children)
+      b.hidden = !b.dataset.search.includes(search.value.toLowerCase());
+  };
+  box.append(search, grid);
+  return box;
+}
+function iconLabel(id) {
+  return strings[lang]["icon_" + id] ?? id.replace(/([a-z])([A-Z])/g, "$1 $2");
+}
+function featureControls() {
+  const box = el(
+    "details",
+    { class: "feature-options" },
+    el("summary", {}, t("aiOptions")),
+    el("p", { class: "muted" }, t("aiOptionsHelp")),
+  );
+  box.append(
+    field(
+      t("badgeCount"),
+      el("input", {
+        id: "badge-count",
+        type: "number",
+        min: 0,
+        max: 20,
+        value: features.badgeCount,
+        placeholder: "10",
+        oninput: (e) => (features.badgeCount = e.target.value),
+      }),
+    ),
+  );
+  for (const k of ["frequency", "streaks", "reminders", "urgency"])
+    box.append(
+      checkbox(
+        t("optimise_" + k),
+        features[k],
+        (v) => (features[k] = v),
+        "optimise-" + k,
+      ),
+    );
+  return box;
+}
 const colorHex = {
   GREEN: "#15803d",
   BLUE: "#1d4ed8",
@@ -555,6 +657,7 @@ function renderPlan(main) {
         oninput: (e) => (feedback = e.target.value),
       }),
     ),
+    featureControls(),
     cloudControl(),
     button(busy ? t("working") : t("moreIdeas"), () => suggest(true), false, {
       id: "more-ideas",
@@ -584,7 +687,7 @@ function itemCard(item) {
           style: "color:" + colorHex[item.color],
           "aria-hidden": "true",
         },
-        emoji[item.icon],
+        iconNode(item.icon),
       ),
       el("h3", {}, item.name || t("untitled")),
     ),
@@ -629,6 +732,15 @@ function itemCard(item) {
       ),
     ),
   );
+  if (item.kind === "task") {
+    const info = [];
+    if (item.badges?.length) info.push(item.badges.length + " " + t("badges"));
+    if (item.streakBonus) info.push(t("streaks"));
+    if (item.reminder) info.push(t("reminders"));
+    if (item.isUrgent) info.push(t("urgent"));
+    if (info.length)
+      node.append(el("p", { class: "idea-options-summary" }, info.join(" · ")));
+  }
   const details = el(
     "details",
     {
@@ -687,19 +799,7 @@ function itemCard(item) {
           oninput: (e) => update("pointAmount", e.target.value),
         }),
       ),
-      field(
-        t("icon"),
-        select(
-          item.icon,
-          icons,
-          (v) => {
-            update("icon", v);
-            render();
-          },
-          "icon-" + item.id,
-          (v) => emoji[v] + " " + t("icon_" + v),
-        ),
-      ),
+      iconPicker(item, update),
       field(
         t("color"),
         select(
@@ -748,9 +848,29 @@ function itemCard(item) {
       "approval-" + item.id,
     ),
   );
+  if (item.kind === "task")
+    details.append(
+      taskOptionsEditor(item, {
+        el,
+        field,
+        select,
+        checkbox,
+        button,
+        t,
+        persist,
+        render,
+      }),
+    );
   return node;
 }
 function download() {
+  for (const control of root.querySelectorAll("input,textarea,select")) {
+    if (!control.checkValidity()) {
+      control.closest("details")?.setAttribute("open", "");
+      control.reportValidity();
+      return;
+    }
+  }
   let json;
   try {
     json = exportPlan(plan);

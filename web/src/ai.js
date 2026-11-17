@@ -14,6 +14,7 @@ import {
 } from "firebase/ai";
 import instructions from "../../androidApp/src/main/assets/routine-instructions.txt?raw";
 import planningInstructions from "./planning-instructions.txt?raw";
+import localParentInstructions from "./parent-local-instructions.txt?raw";
 import parentInstructions from "./parent-instructions.txt?raw";
 import {
   validateParentRequest,
@@ -22,6 +23,7 @@ import {
   colors,
   frequencies,
 } from "./parent-plan.js";
+import { featureChoices } from "./task-options.js";
 import { request, draft } from "./core.js";
 const env = import.meta.env;
 export const cloudConfigured = Boolean(
@@ -100,31 +102,84 @@ export async function generate(
         "One brief sentence explaining the choice, at most 160 characters.",
     });
   if (r.includeReward) properties.reward = Schema.string();
-  const itemSchema = Schema.object({
-    properties: {
-      name: Schema.string(),
-      description: Schema.string(),
-      pointAmount: Schema.integer(),
-      icon: Schema.enumString({ enum: icons }),
-      color: Schema.enumString({ enum: colors }),
-      limitType: Schema.enumString({ enum: frequencies }),
-      limitValue: Schema.integer(),
-      requireApproval: Schema.boolean(),
-    },
-  });
+  const baseProperties = {
+    name: Schema.string(),
+    description: Schema.string(),
+    pointAmount: Schema.integer(),
+    icon: Schema.string({
+      description: "Supported StarJar icon ID from the prompt.",
+    }),
+    color: Schema.enumString({ enum: colors }),
+    limitType: Schema.enumString({ enum: frequencies }),
+    limitValue: Schema.integer(),
+    requireApproval: Schema.boolean(),
+  };
+  const itemSchema = Schema.object({ properties: baseProperties });
+  const f = featureChoices(r.features);
+  const taskProperties = { ...baseProperties };
+  if (f.badgeCount)
+    taskProperties.badges = Schema.array({
+      items: Schema.object({
+        properties: {
+          completionsRequired: Schema.integer(),
+          title: Schema.string(),
+          bonusPoints: Schema.integer(),
+        },
+      }),
+    });
+  if (f.streaks)
+    taskProperties.streakBonus = Schema.object({
+      nullable: true,
+      properties: {
+        bonusPoints: Schema.integer(),
+        everyValue: Schema.integer(),
+        everyUnit: Schema.enumString({
+          enum: ["TIME", "DAY", "WEEK", "MONTH"],
+        }),
+        forValue: Schema.integer(),
+        forUnit: Schema.enumString({ enum: ["TIME", "DAY", "WEEK", "MONTH"] }),
+      },
+    });
+  if (f.reminders)
+    taskProperties.reminder = Schema.object({
+      nullable: true,
+      properties: {
+        frequencyValue: Schema.integer(),
+        frequencyUnit: Schema.enumString({ enum: ["DAY", "WEEK", "MONTH"] }),
+        daysOfWeek: Schema.array({ items: Schema.integer() }),
+        time: Schema.string({ nullable: true }),
+        startDate: Schema.integer({ nullable: true }),
+        endType: Schema.enumString({
+          enum: ["NEVER", "ON_DATE", "AFTER_OCCURRENCES"],
+        }),
+        endDate: Schema.integer({ nullable: true }),
+        endOccurrences: Schema.integer({ nullable: true }),
+      },
+    });
+  if (f.urgency) {
+    taskProperties.isUrgent = Schema.boolean();
+    taskProperties.dueByDate = Schema.integer({ nullable: true });
+    taskProperties.urgencyBonus = Schema.integer({ nullable: true });
+  }
+  const taskSchema = Schema.object({ properties: taskProperties });
   const schema = r.parentPlanning
     ? Schema.object({
         properties: {
-          tasks: Schema.array({ items: itemSchema, maxItems: 6 }),
-          rewards: Schema.array({ items: itemSchema, maxItems: 3 }),
+          tasks: Schema.array({ items: taskSchema }),
+          rewards: Schema.array({ items: itemSchema }),
           reason: Schema.string(),
         },
       })
     : Schema.object({ properties });
-  // A slow browser capability probe must not indefinitely block an approved fallback.
-  const localReady = cloudAllowed
-    ? (await capability()) === "available"
-    : false;
+  const advanced = Boolean(
+    f.badgeCount || f.streaks || f.reminders || f.urgency,
+  );
+  if (r.parentPlanning && advanced && !cloudAllowed)
+    throw Error("ADVANCED_CLOUD");
+  // Rich task settings exceed the tested local model response window. They use
+  // the protected cloud route only with explicit session permission.
+  const localReady =
+    cloudAllowed && !advanced ? (await capability()) === "available" : false;
   if (signal?.aborted) throw Error("CANCELLED");
   const model = getGenerativeModel(ai(cloudAllowed), {
     mode: cloudAllowed
@@ -140,7 +195,7 @@ export async function generate(
       model: "gemini-3.5-flash-lite",
       generationConfig: {
         temperature: 0.2,
-        maxOutputTokens: r.parentPlanning ? 2048 : r.planning ? 512 : 256,
+        maxOutputTokens: r.parentPlanning ? 16384 : r.planning ? 512 : 256,
         responseMimeType: "application/json",
         responseSchema: schema,
       },
@@ -157,12 +212,16 @@ export async function generate(
   const response = (
     await model.generateContent(
       (r.parentPlanning
-        ? parentInstructions
+        ? !cloudAllowed || localReady
+          ? localParentInstructions
+          : parentInstructions
         : r.planning
           ? planningInstructions
           : instructions) +
         "\nREQUEST_DATA:\n" +
-        JSON.stringify(r) +
+        JSON.stringify(
+          r.parentPlanning ? { ...r, iconIds: icons, features: f } : r,
+        ) +
         "\nOUTPUT LANGUAGE: " +
         (r.language === "de"
           ? "German. Use natural German with correct umlauts."
@@ -182,7 +241,7 @@ export async function generate(
     throw Error("SOURCE");
   return {
     draft: r.parentPlanning
-      ? parseSuggestions(JSON.parse(response.text()))
+      ? parseSuggestions(JSON.parse(response.text()), r.features)
       : draft(JSON.parse(response.text()), r),
     receipt: {
       source:

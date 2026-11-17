@@ -343,3 +343,128 @@ Object.assign(strings.de, {
   icon_Celebration: "Feier",
   icon_SelfImprovement: "Ruhe",
 });
+Object.assign(strings.en, {
+  aiOptions: "StarJar options",
+  aiOptionsHelp:
+    "Choose which details AI should suggest for new ideas. Existing cards stay unchanged. Blank badge count means no badges; try 10, up to 20 per task.",
+  badgeCount: "Badges per task (optional)",
+  optimise_frequency: "Suggest frequency limits",
+  optimise_streaks: "Suggest streak bonuses",
+  optimise_reminders: "Suggest reminders",
+  optimise_urgency: "Consider urgency and deadlines",
+  badges: "Badges",
+  badge: "Badge",
+  badgeHelp:
+    "Milestones count total completions, not days. Use increasing thresholds, up to 20 badges.",
+  badgeTitle: "Badge title",
+  completions: "Completions required",
+  bonusStars: "Bonus stars",
+  removeBadge: "Remove badge",
+  addBadge: "Add badge",
+  newBadge: "New achievement",
+  streaks: "Streak bonus",
+  everyCount: "Every",
+  everyUnit: "Frequency unit",
+  forCount: "Maintain for",
+  forUnit: "Duration unit",
+  unit_TIME: "Completions",
+  unit_DAY: "Days",
+  unit_WEEK: "Weeks",
+  unit_MONTH: "Months",
+  reminders: "Reminder",
+  reminderTime: "Reminder time (optional)",
+  reminderHelp:
+    "Choose a time before importing if you want a timed reminder. No time is guessed from a general morning or evening description.",
+  weekdays: "Days of the week (optional)",
+  day_1: "Monday",
+  day_2: "Tuesday",
+  day_3: "Wednesday",
+  day_4: "Thursday",
+  day_5: "Friday",
+  day_6: "Saturday",
+  day_7: "Sunday",
+  startDate: "Start date (optional)",
+  endType: "Ends",
+  end_NEVER: "Never",
+  end_ON_DATE: "On a date",
+  end_AFTER_OCCURRENCES: "After a number of occurrences",
+  endDate: "End date",
+  occurrences: "Occurrences",
+  urgent: "Urgent task",
+  dueDate: "Due date (optional)",
+  searchIcons: "Search icons",
+  richExportInfo:
+    "Includes your selected StarJar settings, including any badges, streak bonuses, reminders and urgency. Import the JSON in StarJar’s template library.",
+});
+Object.assign(strings.de, {
+  aiOptions: "StarJar-Einstellungen",
+  aiOptionsHelp:
+    "Wähle, welche Angaben die KI für neue Ideen vorschlagen soll. Bestehende Karten bleiben unverändert. Ohne Zahl werden keine Abzeichen erstellt. Pro Aufgabe sind bis zu 20 möglich; probiere zum Beispiel 10.",
+  badgeCount: "Abzeichen pro Aufgabe (optional)",
+  optimise_frequency: "Häufigkeitsgrenzen vorschlagen",
+  optimise_streaks: "Serienboni vorschlagen",
+  optimise_reminders: "Erinnerungen vorschlagen",
+  optimise_urgency: "Dringlichkeit und Fristen berücksichtigen",
+  badges: "Abzeichen",
+  badge: "Abzeichen",
+  badgeHelp:
+    "Es zählen die insgesamt erledigten Aufgaben, nicht die Tage. Die Anzahl muss von Abzeichen zu Abzeichen steigen. Maximal 20 Abzeichen.",
+  badgeTitle: "Name des Abzeichens",
+  completions: "Erforderliche Erledigungen",
+  bonusStars: "Bonussterne",
+  removeBadge: "Abzeichen entfernen",
+  addBadge: "Abzeichen hinzufügen",
+  newBadge: "Neuer Erfolg",
+  streaks: "Serienbonus",
+  everyCount: "Alle",
+  everyUnit: "Einheit der Häufigkeit",
+  forCount: "Beibehalten für",
+  forUnit: "Einheit der Dauer",
+  unit_TIME: "Erledigungen",
+  unit_DAY: "Tage",
+  unit_WEEK: "Wochen",
+  unit_MONTH: "Monate",
+  reminders: "Erinnerung",
+  reminderTime: "Uhrzeit (optional)",
+  reminderHelp:
+    "Wähle vor dem Import eine Uhrzeit, wenn du eine zeitgesteuerte Erinnerung möchtest. Aus Angaben wie „morgens“ oder „abends“ wird keine Uhrzeit abgeleitet.",
+  weekdays: "Wochentage (optional)",
+  day_1: "Montag",
+  day_2: "Dienstag",
+  day_3: "Mittwoch",
+  day_4: "Donnerstag",
+  day_5: "Freitag",
+  day_6: "Samstag",
+  day_7: "Sonntag",
+  startDate: "Startdatum (optional)",
+  endType: "Endet",
+  end_NEVER: "Nie",
+  end_ON_DATE: "An einem Datum",
+  end_AFTER_OCCURRENCES: "Nach einer Anzahl von Wiederholungen",
+  endDate: "Enddatum",
+  occurrences: "Wiederholungen",
+  urgent: "Dringende Aufgabe",
+  dueDate: "Fällig am (optional)",
+  searchIcons: "Symbole suchen",
+  richExportInfo:
+    "Enthält deine gewählten StarJar-Einstellungen, einschließlich Abzeichen, Serienboni, Erinnerungen und Dringlichkeit. Importiere die JSON-Datei in StarJars Vorlagenbibliothek.",
+});
+
+Object.assign(strings.en, {
+  advancedCloud:
+    "AI-generated badges, streaks, reminders and urgency currently need cloud generation. Allow cloud access for this session, or turn those options off and edit the details yourself offline.",
+  cloud: "Allow cloud generation for this session",
+});
+Object.assign(strings.de, {
+  advancedCloud:
+    "Für Abzeichen, Serienboni, Erinnerungen und Dringlichkeit benötigt die KI derzeit die Cloud. Erlaube den Cloud-Zugriff für diese Sitzung oder deaktiviere diese Optionen und ergänze die Angaben selbst offline.",
+  cloud: "Cloud-Generierung für diese Sitzung erlauben",
+});
+strings.en.aiOptionsHelp +=
+  " AI suggestions for these extra task settings currently need cloud access; manual editing works offline.";
+strings.de.aiOptionsHelp +=
+  " KI-Vorschläge für diese zusätzlichen Angaben benötigen derzeit Cloud-Zugriff. Manuell kannst du sie auch offline bearbeiten.";
+strings.en.cloudInfo =
+  "Basic suggestions prefer this device when available. AI-generated badges, streaks, reminders and urgency use the cloud. Your original description, options and current/discarded idea context can be sent to Google through Firebase AI Logic. The original description is not saved by this app.";
+strings.de.cloudInfo =
+  "Grundlegende Vorschläge werden nach Möglichkeit auf diesem Gerät erstellt. Für Abzeichen, Serienboni, Erinnerungen und Dringlichkeit nutzt die KI die Cloud. Deine ursprüngliche Beschreibung, Einstellungen sowie aktuelle und verworfene Ideen können über Firebase AI Logic an Google gesendet werden. Die ursprüngliche Beschreibung wird von dieser App nicht gespeichert.";

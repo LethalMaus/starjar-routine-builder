@@ -1,17 +1,7 @@
 import { points } from "./core.js";
-export const icons = [
-  "Check",
-  "Alarm",
-  "Bed",
-  "Brush",
-  "School",
-  "MenuBook",
-  "Redeem",
-  "MusicNote",
-  "SmartToy",
-  "Celebration",
-  "SelfImprovement",
-];
+import { icons } from "./icon-catalog.js";
+export { icons };
+import { taskOptions, featureChoices, enforceChoices } from "./task-options.js";
 export const colors = [
   "GREEN",
   "BLUE",
@@ -70,6 +60,7 @@ export function validateParentRequest(r) {
       text(x.name, 120);
     }
   }
+  if (r.features) featureChoices(r.features);
   return r;
 }
 export function portableItem(item) {
@@ -108,9 +99,10 @@ export function portableItem(item) {
     limitType: item.limitType,
     limitValue,
     requireApproval: item.requireApproval,
+    ...(item.kind === "task" ? taskOptions(item) : {}),
   };
 }
-export function parseSuggestions(raw) {
+export function parseSuggestions(raw, choices) {
   valid(
     raw &&
       typeof raw === "object" &&
@@ -139,11 +131,23 @@ export function parseSuggestions(raw) {
             "limitType",
             "limitValue",
             "requireApproval",
+            ...(kind === "task"
+              ? [
+                  "badges",
+                  "streakBonus",
+                  "reminder",
+                  "isUrgent",
+                  "dueByDate",
+                  "urgencyBonus",
+                ]
+              : []),
           ].includes(k),
         ),
         "RESPONSE",
       );
-      return { ...portableItem(x), kind };
+      const item = { ...portableItem({ ...x, kind }), kind };
+      if (choices) enforceChoices(item, choices);
+      return item;
     });
   return {
     items: [...convert(raw.tasks, "task"), ...convert(raw.rewards, "reward")],
@@ -314,6 +318,7 @@ export function cleanPlan(p) {
       limitType: x.limitType,
       limitValue: x.limitValue,
       requireApproval: x.requireApproval,
+      ...(x.kind === "task" ? taskOptions(x) : {}),
     };
   });
   valid(new Set(items.map((x) => x.id)).size === items.length, "STORAGE");

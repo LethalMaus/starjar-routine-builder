@@ -55,7 +55,7 @@ try {
       .click();
     await page.locator("#title").fill(de ? "Unser Morgen" : "Our morning");
     const task = page.locator('[data-kind="task"]').first();
-    await task.locator("summary").click();
+    await task.locator("summary").first().click();
     await task
       .getByLabel("Name", { exact: true })
       .fill(de ? "Kleidung auswählen" : "Choose clothes");
@@ -75,7 +75,7 @@ try {
       })
       .click();
     const reward = page.locator('[data-kind="reward"]').first();
-    await reward.locator("summary").click();
+    await reward.locator("summary").first().click();
     await reward
       .getByLabel("Name", { exact: true })
       .fill(de ? "Spiel auswählen" : "Choose a game");
@@ -133,8 +133,13 @@ try {
         exact: true,
       })
       .click();
-    for (const d of await page.locator(".idea-card details[open]").all())
-      await d.locator("summary").click();
+    while (await page.locator(".idea-card > details[open]").count())
+      await page
+        .locator(".idea-card > details[open]")
+        .first()
+        .locator("summary")
+        .first()
+        .click();
     await page.screenshot({
       path: path.join(out, lang + "-selection.png"),
       fullPage: true,
@@ -171,7 +176,7 @@ try {
     await page.reload();
     ok(
       (await page
-        .locator('[data-kind="task"] [aria-pressed="true"]')
+        .locator('[data-kind="task"] [data-action="keep"][aria-pressed="true"]')
         .count()) === 1,
       lang + " kept state restored offline",
     );
@@ -186,7 +191,9 @@ try {
       .click();
     ok(
       (await page
-        .locator('[data-kind="reward"] [aria-pressed="true"]')
+        .locator(
+          '[data-kind="reward"] [data-action="keep"][aria-pressed="true"]',
+        )
         .count()) === 1,
       lang + " saved reward restored",
     );

@@ -52,7 +52,7 @@ Suggestions can contain mistakes. Review names, language, suitability and star a
 - Your original problem description, age range and follow-up feedback stay in memory. When cloud use is allowed, these and existing/discarded idea context can be sent to Google's model service. Edited task/reward descriptions are saved with the plan.
 - Edited drafts and saved routines stay on the device: browser local storage on web, app-private no-backup files on Android. They are not synchronised between devices.
 - App Check processes app/device signals. Model downloads and provider verification can use the network independently of prompt inference.
-- The Chrome app exports only items marked Kept, including names, descriptions, stars, icons, colours, frequency limits and approval settings. Android currently retains the earlier basic names/stars editor and export. Import the file using StarJar's template library.
+- The Chrome app exports only items marked Kept, including names, descriptions, stars, all StarJar icons, colours, frequency limits, approval settings and selected task-only options (badges, streaks, reminders and urgency). Android currently retains the earlier basic names/stars editor and export. Import the file using StarJar's template library.
 - Export a copy before clearing browser/app data. There is no account-based backup or restore.
 
 See [usage limits](docs/USAGE_POLICY.md) for the differences between Android and web.

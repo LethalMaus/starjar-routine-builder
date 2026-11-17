@@ -7,3 +7,9 @@ Nunito fonts: SIL Open Font License (licenses/Nunito-OFL.txt).
 Third-party components retain their own licences.
 This grant does not cover the enclosing commercial StarJar repository.
 See docs/EXISTING_WORK.md for pre-existing work disclosure.
+
+Material Icons and Material Icons Outlined fonts
+Copyright Google LLC. Apache License 2.0.
+Source: https://github.com/google/material-design-icons
+See licenses/Material-Icons-LICENSE.
+The Dishwasher vector is adapted from StarJar's original Apache-licensed vector.

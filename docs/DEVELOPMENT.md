@@ -23,3 +23,7 @@ Firebase client configuration is supplied through ignored local properties or en
 ## Offline behaviour
 
 Android stores edited drafts/routines in app-private no-backup files. The browser uses local storage and caches bundled application assets through a service worker. Cloud traffic, credentials and prompts are not cached by the service worker. Local generation also requires a downloaded browser model.
+
+## Full task options
+
+`task-options.js` validates badge thresholds and counts, streak units, reminder schedules and urgency dates. Rewards never receive task-only fields. Explicit generation preferences override model output; requested badge counts are checked rather than silently shortened. Basic generation supports the local route. AI-generated optional task details require explicit cloud permission; local attempts, including per-task enrichment, exceeded the tested model response window. Manual editing/export of all fields remains offline-capable. Structured schemas omit nested array cardinality constraints because the provider rejects their combined state space; application validation enforces all limits.
