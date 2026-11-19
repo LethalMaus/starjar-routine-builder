@@ -1,5 +1,12 @@
 import "./style.css";
 import starry from "../../androidApp/src/main/res/drawable/starry.png";
+import { printPlan } from "./print-plan.js";
+import {
+  readPlanFile,
+  exportEditablePlan,
+  shareTemplates,
+  downloadFile,
+} from "./transfer.js";
 import { taskOptionsEditor } from "./task-options-ui.js";
 import { featureChoices } from "./task-options.js";
 import { iconText } from "./icon-catalog.js";
@@ -36,10 +43,11 @@ let lang = navigator.language.startsWith("de") ? "de" : "en",
   controller = null,
   cloudAllowed = false,
   storageError = false;
+let incomingPlan = null;
 const expanded = new Set();
 let features = {
   badgeCount: "",
-  frequency: true,
+  frequency: false,
   streaks: false,
   reminders: false,
   urgency: false,
@@ -258,7 +266,8 @@ function render() {
   if (!navigator.onLine)
     main.append(el("p", { class: "notice" }, t("offline")));
   if (storageError) main.append(el("p", { class: "notice" }, t("storage")));
-  if (screen === "create") renderCreate(main);
+  if (incomingPlan) renderImportReview(main);
+  else if (screen === "create") renderCreate(main);
   else if (screen === "edit" && plan) renderPlan(main);
   else renderSaved(main);
   main.append(el("footer", {}, t("adult"), " · ", t("draftSaved")));
@@ -288,6 +297,9 @@ function cloudControl() {
           ? t("cloudInfo")
           : t("localInfo"),
     ),
+    lang === "de" && !cloudAllowed
+      ? el("p", { class: "notice", id: "local-language-notice" }, t("localLanguageUnavailable"))
+      : lang === "en" ? el("p", { class: "muted" }, t("localDefaults")) : null,
   );
 }
 function renderCreate(main) {
@@ -388,6 +400,7 @@ function renderCreate(main) {
         busy ? t("working") : t("suggestIdeas"),
       ),
       button(t("manual"), manual, true),
+      button(t("openPlan"), openPlanFile, true, { id: "open-plan" }),
     ),
   );
   if (!cloudConfigured) form.querySelector("#cloud").disabled = true;
@@ -452,7 +465,9 @@ async function suggest(more) {
       t(
         signal.aborted
           ? "cancelled"
-          : e.message === "ADVANCED_CLOUD"
+          : e.message === "LOCAL_LANGUAGE_UNAVAILABLE"
+            ? "localLanguageUnavailable"
+            : e.message === "ADVANCED_CLOUD"
             ? "advancedCloud"
             : e.message === "NEEDS_INPUT"
               ? "needs"
@@ -635,7 +650,7 @@ function renderPlan(main) {
     el(
       "p",
       { class: "selection-count", id: "selected-count" },
-      t("chosenCount").replace("{n}", selected),
+      t(selected === 1 ? "chosenCountOne" : "chosenCount").replace("{n}", selected),
     ),
     el(
       "div",
@@ -654,6 +669,59 @@ function renderPlan(main) {
       }),
     ),
     el("p", { class: "muted" }, t("richExportInfo")),
+    button(
+      t("printPlan"),
+      () => {
+        try {
+          printPlan(plan, lang);
+        } catch {
+          message(t("invalid"));
+        }
+      },
+      true,
+      { id: "print-plan", disabled: !selected },
+    ),
+    el(
+      "details",
+      { class: "feature-options" },
+      el("summary", {}, t("useElsewhere")),
+      el("p", { class: "muted" }, t("transferInfo")),
+      button(
+        t("shareKept"),
+        async () => {
+          try {
+            const result = await shareTemplates(plan);
+            message(
+              t(
+                result === "shared"
+                  ? "shareDone"
+                  : result === "cancelled"
+                    ? "shareCancelled"
+                    : "shareUnsupported",
+              ),
+            );
+          } catch {
+            message(t("invalid"));
+          }
+        },
+        true,
+        { id: "share-kept", disabled: !selected },
+      ),
+      button(
+        t("saveEditable"),
+        () => {
+          try {
+            downloadFile(exportEditablePlan(plan), "starjar-ideas-plan.json");
+            message(t("exported"));
+          } catch {
+            message(t("invalid"));
+          }
+        },
+        true,
+        { id: "save-editable" },
+      ),
+      button(t("openPlan"), openPlanFile, true),
+    ),
   );
   const more = el(
     "section",
@@ -877,6 +945,84 @@ function itemCard(item) {
     );
   return node;
 }
+function openPlanFile() {
+  const inputFile = el("input", {
+    type: "file",
+    accept: ".json,application/json",
+    onchange: async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      try {
+        if (file.size > 200000) throw Error("IMPORT_SIZE");
+        incomingPlan = readPlanFile(
+          await file.text(),
+          lang,
+          t("importedTitle"),
+        );
+        render();
+      } catch {
+        message(t("importInvalid"));
+      } finally {
+        inputFile.remove();
+      }
+    },
+  });
+  inputFile.hidden = true;
+  document.body.append(inputFile);
+  inputFile.click();
+}
+function renderImportReview(main) {
+  const card = el(
+    "section",
+    { class: "card" },
+    el("h1", {}, t("reviewImport")),
+    el("p", {}, t("reviewImportInfo")),
+    el("h2", {}, incomingPlan.title),
+  );
+  const list = el("ul");
+  for (const item of incomingPlan.items)
+    list.append(
+      el("li", {}, item.name + " · " + item.pointAmount + " " + t("stars")),
+    );
+  card.append(
+    list,
+    el(
+      "div",
+      { class: "actions" },
+      button(
+        t("openImported"),
+        () => {
+          if (plan && !confirm(t("newConfirm"))) return;
+          plan = incomingPlan;
+          incomingPlan = null;
+          receipt = null;
+          reason = "";
+          feedback = "";
+          input = {
+            goal: "",
+            ageBand: "unspecified",
+            minutes: "",
+            constraints: [],
+          };
+          screen = "edit";
+          persist();
+          render();
+        },
+        false,
+        { id: "accept-import" },
+      ),
+      button(
+        t("cancel"),
+        () => {
+          incomingPlan = null;
+          render();
+        },
+        true,
+      ),
+    ),
+  );
+  main.append(card);
+}
 function download() {
   for (const control of root.querySelectorAll("input,textarea,select")) {
     if (!control.checkValidity()) {
@@ -930,7 +1076,7 @@ function renderSaved(main) {
         el(
           "p",
           {},
-          t("chosenCount").replace(
+          t(p.items.filter((x) => x.state === "kept").length === 1 ? "chosenCountOne" : "chosenCount").replace(
             "{n}",
             p.items.filter((x) => x.state === "kept").length,
           ),

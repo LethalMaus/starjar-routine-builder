@@ -23,8 +23,15 @@ import {
   colors,
   frequencies,
 } from "./parent-plan.js";
+import { localPlanningContext, localPlanningResult, supportsLocalPlanning } from "./local-planning.js";
 import { featureChoices } from "./task-options.js";
 import { request, draft } from "./core.js";
+function localLanguageOptions(language) {
+  return {
+    expectedInputs: [{ type: "text", languages: language === "de" ? ["en", "de"] : ["en"] }],
+    expectedOutputs: [{ type: "text", languages: [language === "de" ? "de" : "en"] }],
+  };
+}
 const env = import.meta.env;
 export const cloudConfigured = Boolean(
   env.VITE_FIREBASE_APP_ID &&
@@ -66,12 +73,12 @@ function ai(useCloud) {
   }
   return cloud;
 }
-export async function capability() {
+export async function capability(language = "en") {
   if (typeof LanguageModel === "undefined") return "unavailable";
   let timer;
   try {
     return await Promise.race([
-      LanguageModel.availability(),
+      LanguageModel.availability(localLanguageOptions(language)),
       new Promise((resolve) => {
         timer = setTimeout(() => resolve("unknown"), 3000);
       }),
@@ -172,15 +179,26 @@ export async function generate(
       })
     : Schema.object({ properties });
   const advanced = Boolean(
-    f.badgeCount || f.streaks || f.reminders || f.urgency,
+    f.badgeCount || f.frequency || f.streaks || f.reminders || f.urgency,
   );
+  if (r.parentPlanning && !supportsLocalPlanning(r.language) && !cloudAllowed)
+    throw Error("LOCAL_LANGUAGE_UNAVAILABLE");
   if (r.parentPlanning && advanced && !cloudAllowed)
     throw Error("ADVANCED_CLOUD");
   // Rich task settings exceed the tested local model response window. They use
   // the protected cloud route only with explicit session permission.
   const localReady =
-    cloudAllowed && !advanced ? (await capability()) === "available" : false;
+    cloudAllowed && !advanced && (!r.parentPlanning || supportsLocalPlanning(r.language)) ? (await capability(r.language)) === "available" : false;
   if (signal?.aborted) throw Error("CANCELLED");
+  const simpleLocal = r.parentPlanning && (!cloudAllowed || localReady);
+  const ideaSchema = Schema.object({ properties: {
+    name: Schema.string({ description: "Short action title, at most 60 characters" }),
+    description: Schema.string({ description: "One simple sentence, at most 180 characters" }),
+  } });
+  const responseSchema = simpleLocal ? Schema.object({ properties: {
+    tasks: Schema.array({ items: ideaSchema }),
+    rewards: Schema.array({ items: ideaSchema }),
+  } }) : schema;
   const model = getGenerativeModel(ai(cloudAllowed), {
     mode: cloudAllowed
       ? localReady
@@ -188,8 +206,8 @@ export async function generate(
         : InferenceMode.ONLY_IN_CLOUD
       : InferenceMode.ONLY_ON_DEVICE,
     onDeviceParams: {
-      createOptions: { temperature: 0.2, topK: 3 },
-      promptOptions: { responseConstraint: schema },
+      createOptions: { ...localLanguageOptions(r.language), temperature: 0.2, topK: 3 },
+      promptOptions: { responseConstraint: responseSchema },
     },
     inCloudParams: {
       model: "gemini-3.5-flash-lite",
@@ -197,7 +215,7 @@ export async function generate(
         temperature: 0.2,
         maxOutputTokens: r.parentPlanning ? 16384 : r.planning ? 512 : 256,
         responseMimeType: "application/json",
-        responseSchema: schema,
+        responseSchema,
       },
     },
   });
@@ -220,7 +238,7 @@ export async function generate(
           : instructions) +
         "\nREQUEST_DATA:\n" +
         JSON.stringify(
-          r.parentPlanning ? { ...r, iconIds: icons, features: f } : r,
+          simpleLocal ? localPlanningContext(r) : r.parentPlanning ? { ...r, iconIds: icons, features: f } : r,
         ) +
         "\nOUTPUT LANGUAGE: " +
         (r.language === "de"
@@ -241,7 +259,9 @@ export async function generate(
     throw Error("SOURCE");
   return {
     draft: r.parentPlanning
-      ? parseSuggestions(JSON.parse(response.text()), r.features)
+      ? simpleLocal
+        ? localPlanningResult(JSON.parse(response.text()), r.language, r.features)
+        : parseSuggestions(JSON.parse(response.text()), r.features)
       : draft(JSON.parse(response.text()), r),
     receipt: {
       source:

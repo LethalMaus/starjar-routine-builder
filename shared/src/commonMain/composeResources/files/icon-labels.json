@@ -1,0 +1,670 @@
+{
+  "AccountCircle": {
+    "en": "Account",
+    "de": "Konto"
+  },
+  "Add": {
+    "en": "Plus",
+    "de": "Plus"
+  },
+  "AddOutlined": {
+    "en": "Plus outline",
+    "de": "Plus, Umriss"
+  },
+  "Alarm": {
+    "en": "Alarm clock",
+    "de": "Wecker"
+  },
+  "Archive": {
+    "en": "Archive box",
+    "de": "Archivbox"
+  },
+  "ArrowBack": {
+    "en": "Back arrow",
+    "de": "Pfeil zurück"
+  },
+  "ArrowForward": {
+    "en": "Forward arrow",
+    "de": "Pfeil vorwärts"
+  },
+  "Assessment": {
+    "en": "Bar chart",
+    "de": "Balkendiagramm"
+  },
+  "AutoFixHigh": {
+    "en": "Magic wand",
+    "de": "Zauberstab"
+  },
+  "AutoStories": {
+    "en": "Open book with pages",
+    "de": "Aufgeschlagenes Buch mit Seiten"
+  },
+  "Bathtub": {
+    "en": "Bathtub",
+    "de": "Badewanne"
+  },
+  "BeachAccess": {
+    "en": "Beach umbrella",
+    "de": "Sonnenschirm"
+  },
+  "Bed": {
+    "en": "Bed",
+    "de": "Bett"
+  },
+  "Book": {
+    "en": "Book",
+    "de": "Buch"
+  },
+  "BrightnessHigh": {
+    "en": "Bright sun",
+    "de": "Helle Sonne"
+  },
+  "BrightnessLow": {
+    "en": "Dim sun",
+    "de": "Gedämpfte Sonne"
+  },
+  "Brush": {
+    "en": "Paintbrush",
+    "de": "Pinsel"
+  },
+  "Cake": {
+    "en": "Birthday cake",
+    "de": "Geburtstagskuchen"
+  },
+  "Calculate": {
+    "en": "Calculator",
+    "de": "Taschenrechner"
+  },
+  "CalendarToday": {
+    "en": "Calendar",
+    "de": "Kalender"
+  },
+  "Camera": {
+    "en": "Camera",
+    "de": "Kamera"
+  },
+  "Celebration": {
+    "en": "Celebration",
+    "de": "Feier"
+  },
+  "Check": {
+    "en": "Check mark",
+    "de": "Häkchen"
+  },
+  "Checkroom": {
+    "en": "Clothes hanger",
+    "de": "Kleiderbügel"
+  },
+  "ChildCare": {
+    "en": "Child",
+    "de": "Kind"
+  },
+  "CleanHands": {
+    "en": "Wash hands",
+    "de": "Hände waschen"
+  },
+  "CleaningServices": {
+    "en": "Cleaning",
+    "de": "Putzen"
+  },
+  "Close": {
+    "en": "Cross",
+    "de": "Kreuz"
+  },
+  "Cloud": {
+    "en": "Cloud",
+    "de": "Wolke"
+  },
+  "Countertops": {
+    "en": "Kitchen worktop",
+    "de": "Küchenarbeitsplatte"
+  },
+  "Dashboard": {
+    "en": "Dashboard",
+    "de": "Übersicht"
+  },
+  "Delete": {
+    "en": "Bin",
+    "de": "Mülleimer"
+  },
+  "DeleteOutlined": {
+    "en": "Bin outline",
+    "de": "Mülleimer, Umriss"
+  },
+  "DirectionsBike": {
+    "en": "Cycling",
+    "de": "Radfahren"
+  },
+  "DirectionsRun": {
+    "en": "Running",
+    "de": "Laufen"
+  },
+  "Dishwasher": {
+    "en": "Dishwasher",
+    "de": "Geschirrspüler"
+  },
+  "Drafts": {
+    "en": "Open envelope",
+    "de": "Offener Briefumschlag"
+  },
+  "Draw": {
+    "en": "Drawing",
+    "de": "Zeichnen"
+  },
+  "Edit": {
+    "en": "Pencil",
+    "de": "Bleistift"
+  },
+  "EditOutlined": {
+    "en": "Pencil outline",
+    "de": "Bleistift, Umriss"
+  },
+  "Email": {
+    "en": "Envelope",
+    "de": "Briefumschlag"
+  },
+  "EmojiEvents": {
+    "en": "Trophy",
+    "de": "Pokal"
+  },
+  "Event": {
+    "en": "Calendar event",
+    "de": "Kalendertermin"
+  },
+  "ExitToApp": {
+    "en": "Exit",
+    "de": "Ausgang"
+  },
+  "Extension": {
+    "en": "Puzzle piece",
+    "de": "Puzzleteil"
+  },
+  "Face": {
+    "en": "Face",
+    "de": "Gesicht"
+  },
+  "Fastfood": {
+    "en": "Burger and drink",
+    "de": "Burger und Getränk"
+  },
+  "Favorite": {
+    "en": "Heart",
+    "de": "Herz"
+  },
+  "FavoriteOutlined": {
+    "en": "Heart outline",
+    "de": "Herz, Umriss"
+  },
+  "FilterList": {
+    "en": "Filter",
+    "de": "Filter"
+  },
+  "FitnessCenter": {
+    "en": "Dumbbell",
+    "de": "Hantel"
+  },
+  "Flatware": {
+    "en": "Cutlery",
+    "de": "Besteck"
+  },
+  "Forest": {
+    "en": "Forest",
+    "de": "Wald"
+  },
+  "Games": {
+    "en": "Game controller",
+    "de": "Spielsteuerung"
+  },
+  "GridView": {
+    "en": "Grid",
+    "de": "Raster"
+  },
+  "Group": {
+    "en": "Group",
+    "de": "Gruppe"
+  },
+  "Headphones": {
+    "en": "Headphones",
+    "de": "Kopfhörer"
+  },
+  "Help": {
+    "en": "Question mark",
+    "de": "Fragezeichen"
+  },
+  "HelpOutlined": {
+    "en": "Question mark outline",
+    "de": "Fragezeichen, Umriss"
+  },
+  "Hiking": {
+    "en": "Hiking",
+    "de": "Wandern"
+  },
+  "History": {
+    "en": "History",
+    "de": "Verlauf"
+  },
+  "Home": {
+    "en": "Home",
+    "de": "Zuhause"
+  },
+  "Icecream": {
+    "en": "Ice cream",
+    "de": "Eis"
+  },
+  "Inbox": {
+    "en": "Inbox",
+    "de": "Posteingang"
+  },
+  "Info": {
+    "en": "Information",
+    "de": "Information"
+  },
+  "InfoOutlined": {
+    "en": "Information outline",
+    "de": "Information, Umriss"
+  },
+  "Iron": {
+    "en": "Iron",
+    "de": "Bügeleisen"
+  },
+  "KeyboardArrowLeft": {
+    "en": "Left arrow",
+    "de": "Pfeil nach links"
+  },
+  "KeyboardArrowRight": {
+    "en": "Right arrow",
+    "de": "Pfeil nach rechts"
+  },
+  "Kitchen": {
+    "en": "Fridge",
+    "de": "Kühlschrank"
+  },
+  "Language": {
+    "en": "Languages",
+    "de": "Sprachen"
+  },
+  "Laptop": {
+    "en": "Laptop",
+    "de": "Laptop"
+  },
+  "Lightbulb": {
+    "en": "Light bulb",
+    "de": "Glühbirne"
+  },
+  "LightbulbOutlined": {
+    "en": "Light bulb outline",
+    "de": "Glühbirne, Umriss"
+  },
+  "List": {
+    "en": "List",
+    "de": "Liste"
+  },
+  "ListAlt": {
+    "en": "Checklist",
+    "de": "Checkliste"
+  },
+  "LocalBar": {
+    "en": "Cocktail glass",
+    "de": "Cocktailglas"
+  },
+  "LocalCafe": {
+    "en": "Cup",
+    "de": "Tasse"
+  },
+  "LocalFlorist": {
+    "en": "Flower",
+    "de": "Blume"
+  },
+  "LocalLaundryService": {
+    "en": "Washing machine",
+    "de": "Waschmaschine"
+  },
+  "LocalPizza": {
+    "en": "Pizza",
+    "de": "Pizza"
+  },
+  "Lock": {
+    "en": "Closed padlock",
+    "de": "Geschlossenes Schloss"
+  },
+  "LockOpen": {
+    "en": "Open padlock",
+    "de": "Offenes Schloss"
+  },
+  "Logout": {
+    "en": "Log out",
+    "de": "Abmelden"
+  },
+  "Loop": {
+    "en": "Loop arrows",
+    "de": "Kreispfeile"
+  },
+  "Medication": {
+    "en": "Medicine",
+    "de": "Medikament"
+  },
+  "Menu": {
+    "en": "Menu",
+    "de": "Menü"
+  },
+  "MenuBook": {
+    "en": "Open book",
+    "de": "Aufgeschlagenes Buch"
+  },
+  "Mic": {
+    "en": "Microphone",
+    "de": "Mikrofon"
+  },
+  "MoreVert": {
+    "en": "More options",
+    "de": "Weitere Optionen"
+  },
+  "Movie": {
+    "en": "Film",
+    "de": "Film"
+  },
+  "Museum": {
+    "en": "Museum",
+    "de": "Museum"
+  },
+  "MusicNote": {
+    "en": "Music note",
+    "de": "Musiknote"
+  },
+  "NightsStay": {
+    "en": "Moon and cloud",
+    "de": "Mond und Wolke"
+  },
+  "Notes": {
+    "en": "Notes",
+    "de": "Notizen"
+  },
+  "Notifications": {
+    "en": "Bell",
+    "de": "Glocke"
+  },
+  "NotificationsOutlined": {
+    "en": "Bell outline",
+    "de": "Glocke, Umriss"
+  },
+  "Outbox": {
+    "en": "Outbox",
+    "de": "Postausgang"
+  },
+  "OutdoorGrill": {
+    "en": "Barbecue",
+    "de": "Grill"
+  },
+  "Palette": {
+    "en": "Paint palette",
+    "de": "Farbpalette"
+  },
+  "Pause": {
+    "en": "Pause",
+    "de": "Pause"
+  },
+  "Person": {
+    "en": "Person",
+    "de": "Person"
+  },
+  "Pets": {
+    "en": "Paw print",
+    "de": "Pfotenabdruck"
+  },
+  "Phone": {
+    "en": "Phone",
+    "de": "Telefon"
+  },
+  "Piano": {
+    "en": "Piano",
+    "de": "Klavier"
+  },
+  "Place": {
+    "en": "Location pin",
+    "de": "Standortmarkierung"
+  },
+  "PlayArrow": {
+    "en": "Play",
+    "de": "Abspielen"
+  },
+  "Pool": {
+    "en": "Swimming",
+    "de": "Schwimmen"
+  },
+  "Psychology": {
+    "en": "Mind",
+    "de": "Denken"
+  },
+  "Public": {
+    "en": "Globe",
+    "de": "Globus"
+  },
+  "Recycling": {
+    "en": "Recycling",
+    "de": "Recycling"
+  },
+  "Redeem": {
+    "en": "Gift",
+    "de": "Geschenk"
+  },
+  "Refresh": {
+    "en": "Refresh",
+    "de": "Aktualisieren"
+  },
+  "Repeat": {
+    "en": "Repeat",
+    "de": "Wiederholen"
+  },
+  "Restaurant": {
+    "en": "Restaurant",
+    "de": "Restaurant"
+  },
+  "RocketLaunch": {
+    "en": "Rocket",
+    "de": "Rakete"
+  },
+  "Savings": {
+    "en": "Piggy bank",
+    "de": "Sparschwein"
+  },
+  "Schedule": {
+    "en": "Clock",
+    "de": "Uhr"
+  },
+  "School": {
+    "en": "Graduation cap",
+    "de": "Abschlusskappe"
+  },
+  "Science": {
+    "en": "Laboratory flask",
+    "de": "Laborkolben"
+  },
+  "Search": {
+    "en": "Magnifying glass",
+    "de": "Lupe"
+  },
+  "SelfImprovement": {
+    "en": "Meditation",
+    "de": "Meditation"
+  },
+  "Send": {
+    "en": "Paper plane",
+    "de": "Papierflieger"
+  },
+  "SentimentSatisfied": {
+    "en": "Smiling face",
+    "de": "Lächelndes Gesicht"
+  },
+  "Settings": {
+    "en": "Cog",
+    "de": "Zahnrad"
+  },
+  "SettingsOutlined": {
+    "en": "Cog outline",
+    "de": "Zahnrad, Umriss"
+  },
+  "Share": {
+    "en": "Share",
+    "de": "Teilen"
+  },
+  "ShoppingBasket": {
+    "en": "Shopping basket",
+    "de": "Einkaufskorb"
+  },
+  "Shower": {
+    "en": "Shower",
+    "de": "Dusche"
+  },
+  "Skateboarding": {
+    "en": "Skateboarding",
+    "de": "Skateboardfahren"
+  },
+  "SkipNext": {
+    "en": "Skip forwards",
+    "de": "Vorwärtsspringen"
+  },
+  "SkipPrevious": {
+    "en": "Skip backwards",
+    "de": "Zurückspringen"
+  },
+  "SmartToy": {
+    "en": "Robot toy",
+    "de": "Spielzeugroboter"
+  },
+  "Smartphone": {
+    "en": "Smartphone",
+    "de": "Smartphone"
+  },
+  "Soap": {
+    "en": "Soap",
+    "de": "Seife"
+  },
+  "Sort": {
+    "en": "Sort",
+    "de": "Sortieren"
+  },
+  "Spa": {
+    "en": "Lotus flower",
+    "de": "Lotusblume"
+  },
+  "Spellcheck": {
+    "en": "Spelling check",
+    "de": "Rechtschreibprüfung"
+  },
+  "SportsBaseball": {
+    "en": "Baseball",
+    "de": "Baseball"
+  },
+  "SportsBasketball": {
+    "en": "Basketball",
+    "de": "Basketball"
+  },
+  "SportsFootball": {
+    "en": "American football",
+    "de": "American Football"
+  },
+  "SportsRugby": {
+    "en": "Rugby",
+    "de": "Rugby"
+  },
+  "SportsSoccer": {
+    "en": "Football",
+    "de": "Fußball"
+  },
+  "SportsTennis": {
+    "en": "Tennis",
+    "de": "Tennis"
+  },
+  "SportsVolleyball": {
+    "en": "Volleyball",
+    "de": "Volleyball"
+  },
+  "Star": {
+    "en": "Star",
+    "de": "Stern"
+  },
+  "StarOutlined": {
+    "en": "Star outline",
+    "de": "Stern, Umriss"
+  },
+  "Stop": {
+    "en": "Stop",
+    "de": "Stopp"
+  },
+  "Stroller": {
+    "en": "Pushchair",
+    "de": "Kinderwagen"
+  },
+  "TableRestaurant": {
+    "en": "Table",
+    "de": "Tisch"
+  },
+  "Tablet": {
+    "en": "Tablet",
+    "de": "Tablet"
+  },
+  "Terrain": {
+    "en": "Mountains",
+    "de": "Berge"
+  },
+  "ThumbUp": {
+    "en": "Thumbs up",
+    "de": "Daumen hoch"
+  },
+  "Timer": {
+    "en": "Stopwatch",
+    "de": "Stoppuhr"
+  },
+  "Tv": {
+    "en": "Television",
+    "de": "Fernseher"
+  },
+  "Umbrella": {
+    "en": "Umbrella",
+    "de": "Regenschirm"
+  },
+  "Visibility": {
+    "en": "Eye",
+    "de": "Auge"
+  },
+  "VolumeDown": {
+    "en": "Quiet speaker",
+    "de": "Leiser Lautsprecher"
+  },
+  "VolumeUp": {
+    "en": "Loud speaker",
+    "de": "Lauter Lautsprecher"
+  },
+  "VolunteerActivism": {
+    "en": "Helping hands",
+    "de": "Helfende Hände"
+  },
+  "Warning": {
+    "en": "Warning triangle",
+    "de": "Warndreieck"
+  },
+  "Wash": {
+    "en": "Washing",
+    "de": "Waschen"
+  },
+  "Watch": {
+    "en": "Wristwatch",
+    "de": "Armbanduhr"
+  },
+  "WaterDrop": {
+    "en": "Water drop",
+    "de": "Wassertropfen"
+  },
+  "Whatshot": {
+    "en": "Flame",
+    "de": "Flamme"
+  },
+  "Work": {
+    "en": "Briefcase",
+    "de": "Aktentasche"
+  },
+  "Yard": {
+    "en": "Garden",
+    "de": "Garten"
+  }
+}

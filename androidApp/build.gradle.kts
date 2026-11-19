@@ -15,13 +15,14 @@ android {
  compileSdk = 36
  defaultConfig {
   applicationId = "dev.jamescullimore.starjar.routinebuilder"
-  minSdk = 26; targetSdk = 36; versionCode = 3; versionName = "0.3-hackathon"
+  minSdk = 26; targetSdk = 36; versionCode = 9; versionName = "0.9-hackathon"
   testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   buildConfigField("String", "FIREBASE_APP_ID", firebaseValue("appId"))
   buildConfigField("String", "FIREBASE_PROJECT_ID", firebaseValue("projectId"))
   buildConfigField("String", "FIREBASE_API_KEY", firebaseValue("apiKey"))
   buildConfigField("String", "RECAPTCHA_SITE_KEY", firebaseValue("recaptchaSiteKey"))
   buildConfigField("boolean", "USE_RECAPTCHA", providers.gradleProperty("recaptchaAppCheck").map { (it == "true").toString() }.getOrElse("false"))
+  buildConfigField("boolean", "JUDGING_ACCESS", providers.gradleProperty("judgingAccess").map { it.toBooleanStrict().toString() }.getOrElse("false"))
   buildConfigField("String", "CLOUD_MODEL", "\"gemini-3.5-flash-lite\"")
  }
  testBuildType = providers.gradleProperty("testBuildType").getOrElse("debug")
@@ -42,6 +43,7 @@ android {
 kotlin { jvmToolchain(17) }
 dependencies {
  implementation(project(":core"))
+ implementation(project(":shared"))
  implementation("androidx.activity:activity-compose:1.12.3")
  implementation("androidx.compose.ui:ui:1.10.2")
  implementation("androidx.compose.ui:ui-tooling-preview:1.10.2")
@@ -58,6 +60,7 @@ dependencies {
  implementation("com.google.firebase:firebase-appcheck-recaptcha:20.0.0")
  debugImplementation("androidx.compose.ui:ui-tooling:1.10.2")
  testImplementation("junit:junit:4.13.2")
+ testImplementation("org.jetbrains.compose.components:components-resources:1.10.0")
  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
  testImplementation("io.github.sergio-sastre.ComposablePreviewScanner:android:0.8.1")
  androidTestImplementation("androidx.test:runner:1.6.2")
@@ -66,3 +69,15 @@ dependencies {
  debugImplementation("androidx.compose.ui:ui-test-manifest:1.10.2")
 }
 tasks.withType<Test>().configureEach { maxHeapSize = "2g"; javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(21)) }) }
+
+// Render only the current parent editor when iterating on its locale/size matrix.
+tasks.withType<Test>().configureEach {
+ if (providers.gradleProperty("parentPreviewsOnly").orNull == "true") filter.includeTestsMatching("*ParentPreviewLibraryTest")
+}
+// Paparazzi runs outside an Android Application; Compose resources use their classloader fallback.
+tasks.withType<Test>().configureEach {
+ classpath += files(project(":shared").layout.buildDirectory.dir("generated/assets/copyDebugComposeResourcesToAndroidAssets"))
+}
+tasks.withType<Test>().configureEach {
+ providers.gradleProperty("testClass").orNull?.let { filter.includeTestsMatching(it) }
+}

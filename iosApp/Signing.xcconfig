@@ -1,0 +1,3 @@
+// Optional machine-local signing overrides; never store credentials here.
+CODE_SIGN_STYLE = Automatic
+#include? "Signing.local.xcconfig"

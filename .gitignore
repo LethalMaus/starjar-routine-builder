@@ -17,3 +17,14 @@ node_modules/
 dist/
 .env*
 !.env.example
+
+GoogleService-Info.plist
+**/xcuserdata/
+
+AppCheck.local.plist
+
+Signing.local.xcconfig
+
+# Firebase CLI deployment cache and local diagnostics.
+.firebase/
+firebase-debug*.log

@@ -680,3 +680,93 @@ footer {
     color-scheme: dark;
   }
 }
+#print-root {
+  display: none;
+}
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 14mm;
+  }
+  html,
+  body {
+    background: white !important;
+    color: #111 !important;
+    font:
+      11pt Nunito,
+      Arial,
+      sans-serif !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  #app {
+    display: none !important;
+  }
+  #print-root {
+    display: block !important;
+  }
+  .print-plan h1 {
+    font-size: 23pt;
+    margin: 6mm 0;
+  }
+  .print-plan h2 {
+    font-size: 14pt;
+    margin: 6mm 0 2mm;
+    break-after: avoid;
+  }
+  .print-plan p {
+    margin: 2mm 0;
+    line-height: 1.4;
+  }
+  .print-plan .print-brand {
+    font-weight: 900;
+    font-size: 13pt;
+  }
+  .print-plan table {
+    border-collapse: collapse;
+    width: 100%;
+    table-layout: fixed;
+    font-size: 9pt;
+    margin: 4mm 0;
+  }
+  .print-plan th,
+  .print-plan td {
+    border: 1px solid #777;
+    padding: 2mm;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+  }
+  .print-plan th:first-child {
+    width: 42%;
+  }
+  .print-plan th:nth-child(2) {
+    width: 9%;
+  }
+  .print-plan thead {
+    display: table-header-group;
+  }
+  .print-plan tr,
+  .print-plan li {
+    break-inside: avoid;
+  }
+  .print-plan td p {
+    font-size: 8pt;
+  }
+  .print-plan ul {
+    padding-left: 5mm;
+  }
+  .print-plan li {
+    margin-bottom: 3mm;
+  }
+  .print-plan .writing-lines {
+    height: 18mm;
+    border-top: 1px solid #aaa;
+    border-bottom: 1px solid #aaa;
+    margin: 3mm 0;
+  }
+  .print-plan .print-note {
+    font-size: 8pt;
+    color: #444;
+    margin-top: 4mm;
+  }
+}

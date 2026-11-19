@@ -4,7 +4,8 @@ import path from "node:path";
 import { spawn } from "node:child_process";
 const out = process.env.ROUTINE_EVIDENCE || "/tmp/routine-parent-browser";
 fs.mkdirSync(out, { recursive: true });
-const server = spawn(
+const baseUrl = process.env.ROUTINE_BASE_URL || "http://127.0.0.1:8795";
+const server = process.env.ROUTINE_BASE_URL ? null : spawn(
   process.execPath,
   [
     "node_modules/vite/bin/vite.js",
@@ -36,13 +37,34 @@ try {
     const page = await context.newPage();
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));
-    await page.goto("http://127.0.0.1:8795");
+    await page.goto(baseUrl);
     await page.locator("#age").check();
     await page.locator("#start").click();
     ok(
       (await page.locator("#count").count()) === 0,
       lang + " no task count selector",
     );
+    if (!de) {
+      await page.locator("#goal").fill("Getting ready for school");
+      ok(!(await page.locator("#optimise-frequency").isChecked()), "en frequency starts off for basic local generation");
+      await page.locator("#optimise-frequency").evaluate(n => n.closest("details").open = true);
+      await page.locator("#optimise-frequency").check();
+      await page.locator("form button[type=submit]").click();
+      await page.waitForFunction(() => document.getElementById("status").textContent.includes("frequency limits"));
+      ok(!(await page.locator("#cloud").isChecked()), "en frequency requires explicit cloud consent");
+    }
+    if (de) {
+      const cloudRequests = [];
+      page.on("request", r => {
+        if (/firebasevertexai|generativelanguage|aiplatform/.test(r.url())) cloudRequests.push(r.url());
+      });
+      await page.locator("#goal").fill("Morgens aus dem Bett kommen");
+      ok(await page.locator("#local-language-notice").isVisible(), "de local limitation visible before generation");
+      ok(!(await page.locator("#cloud").isChecked()), "de cloud not preselected");
+      await page.locator("form button[type=submit]").click();
+      await page.waitForFunction(() => document.getElementById("status").textContent.includes("noch keine verlässlichen"));
+      ok(cloudRequests.length === 0, "de blocked local request makes no cloud call");
+    }
     await page.screenshot({
       path: path.join(out, lang + "-create.png"),
       fullPage: true,
@@ -91,6 +113,7 @@ try {
       .getByLabel(de ? "Sterne" : "Stars", { exact: true })
       .fill("20");
     await reward.locator('[data-action="keep"]').click();
+    ok((await page.locator("#selected-count").innerText()) === (de ? "1 Idee für StarJar behalten" : "1 item kept for StarJar"), lang + " singular kept-item count");
     await page
       .getByRole("button", {
         name: de ? "Ideen speichern" : "Save ideas",
@@ -114,6 +137,7 @@ try {
       lang + " only kept exported",
     );
     await reward.locator('[data-action="keep"]').click();
+
     dp = page.waitForEvent("download");
     await page.locator("#export").click();
     await (await dp).saveAs(path.join(out, lang + "-rich-export.json"));
@@ -215,5 +239,5 @@ try {
   console.log(JSON.stringify({ passed: checks.length, out }));
 } finally {
   await browser?.close();
-  server.kill();
+  server?.kill();
 }

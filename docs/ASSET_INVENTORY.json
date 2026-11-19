@@ -113,5 +113,80 @@
     "path": "androidApp/src/main/res/values/ic_launcher_background.xml",
     "sha256": "7b6f7672b3c7098e1cb73bec01cd9912560cc9b402b7a06c889fd09800ab8604",
     "rights": "CC BY 4.0; James Cullimore; see licenses/ARTWORK.txt"
+  },
+  {
+    "path": "iosApp/Assets.xcassets/AppIcon.appiconset/AppIcon-20@3x.png",
+    "sha256": "02156ba6e084e233ef81fbaca7a8c0ea6cfab20d07b266c882a9ba4eb59dd62a",
+    "rights": "CC BY 4.0; James Cullimore; existing StarJar launcher rendition, see licenses/ARTWORK.txt; opaque PNG encoding for Apple packaging"
+  },
+  {
+    "path": "iosApp/Assets.xcassets/AppIcon.appiconset/AppIcon-1024.png",
+    "sha256": "e136c9e4e4e6cdac9c63df1d83073dc349d2e6bfc7ae3598466a221be29a5ca1",
+    "rights": "CC BY 4.0; James Cullimore; existing StarJar launcher rendition, see licenses/ARTWORK.txt; opaque PNG encoding for Apple packaging"
+  },
+  {
+    "path": "iosApp/Assets.xcassets/AppIcon.appiconset/AppIcon-76.png",
+    "sha256": "e83c65d1fab542c5540e5fc28c31503572a020194a554a2bc2a7d72242fb6cf7",
+    "rights": "CC BY 4.0; James Cullimore; existing StarJar launcher rendition, see licenses/ARTWORK.txt; opaque PNG encoding for Apple packaging"
+  },
+  {
+    "path": "iosApp/Assets.xcassets/AppIcon.appiconset/AppIcon-20@2x.png",
+    "sha256": "cefc026288e1c837ced5f99e40de1efa4aefc8a4a392d24abb0a3de9be10c42e",
+    "rights": "CC BY 4.0; James Cullimore; existing StarJar launcher rendition, see licenses/ARTWORK.txt; opaque PNG encoding for Apple packaging"
+  },
+  {
+    "path": "iosApp/Assets.xcassets/AppIcon.appiconset/AppIcon-29.png",
+    "sha256": "92e131dbb70efebbc5b8ef32f3e6e325322a78a06bdabce6ff50380d0454b3da",
+    "rights": "CC BY 4.0; James Cullimore; existing StarJar launcher rendition, see licenses/ARTWORK.txt; opaque PNG encoding for Apple packaging"
+  },
+  {
+    "path": "iosApp/Assets.xcassets/AppIcon.appiconset/AppIcon-76@2x.png",
+    "sha256": "583fadcaf086d57522e5eb643139f44af3dee39cf471cda54790bf2f96b90f59",
+    "rights": "CC BY 4.0; James Cullimore; existing StarJar launcher rendition, see licenses/ARTWORK.txt; opaque PNG encoding for Apple packaging"
+  },
+  {
+    "path": "iosApp/Assets.xcassets/AppIcon.appiconset/AppIcon-40@2x.png",
+    "sha256": "ed83e14f3811ecbb6290558efcf7f1bb28d591c4508e88b0c01961c1b9418ed7",
+    "rights": "CC BY 4.0; James Cullimore; existing StarJar launcher rendition, see licenses/ARTWORK.txt; opaque PNG encoding for Apple packaging"
+  },
+  {
+    "path": "iosApp/Assets.xcassets/AppIcon.appiconset/AppIcon-83.5@2x.png",
+    "sha256": "13dc2cad395f15a010bdf4e07e6e74fe1e0992cdd376b9e700027a795d801a59",
+    "rights": "CC BY 4.0; James Cullimore; existing StarJar launcher rendition, see licenses/ARTWORK.txt; opaque PNG encoding for Apple packaging"
+  },
+  {
+    "path": "iosApp/Assets.xcassets/AppIcon.appiconset/AppIcon-40@3x.png",
+    "sha256": "599cbc91cf53e7c982994dacca92be8bd4b60570c583056839538b2028809612",
+    "rights": "CC BY 4.0; James Cullimore; existing StarJar launcher rendition, see licenses/ARTWORK.txt; opaque PNG encoding for Apple packaging"
+  },
+  {
+    "path": "iosApp/Assets.xcassets/AppIcon.appiconset/AppIcon-20.png",
+    "sha256": "0c1f660c4528c327c82e3f1100b75a604562125363d3f8d17c17b2d28aa1c200",
+    "rights": "CC BY 4.0; James Cullimore; existing StarJar launcher rendition, see licenses/ARTWORK.txt; opaque PNG encoding for Apple packaging"
+  },
+  {
+    "path": "iosApp/Assets.xcassets/AppIcon.appiconset/AppIcon-60@3x.png",
+    "sha256": "85ca53c04b1b1943d7e9967eeea94fa319deb7cdeb1d80ab58a7bbac3bcf37a4",
+    "rights": "CC BY 4.0; James Cullimore; existing StarJar launcher rendition, see licenses/ARTWORK.txt; opaque PNG encoding for Apple packaging"
+  },
+  {
+    "path": "iosApp/Assets.xcassets/AppIcon.appiconset/AppIcon-29@2x.png",
+    "sha256": "f5c6cf70c5cb333d8c22e3bbaa92f588698927ff16e1a5052ed80e8498d83b37",
+    "rights": "CC BY 4.0; James Cullimore; existing StarJar launcher rendition, see licenses/ARTWORK.txt; opaque PNG encoding for Apple packaging"
+  },
+  {
+    "path": "iosApp/Assets.xcassets/AppIcon.appiconset/AppIcon-40.png",
+    "sha256": "cefc026288e1c837ced5f99e40de1efa4aefc8a4a392d24abb0a3de9be10c42e",
+    "rights": "CC BY 4.0; James Cullimore; existing StarJar launcher rendition, see licenses/ARTWORK.txt; opaque PNG encoding for Apple packaging"
+  },
+  {
+    "path": "iosApp/Assets.xcassets/AppIcon.appiconset/AppIcon-29@3x.png",
+    "sha256": "b286bc59f032461fb4dc2b9c411da06f96c208962ebc948993bdcfe174d7693b",
+    "rights": "CC BY 4.0; James Cullimore; existing StarJar launcher rendition, see licenses/ARTWORK.txt; opaque PNG encoding for Apple packaging"
+  },
+  {
+    "path": "iosApp/Assets.xcassets/AppIcon.appiconset/AppIcon-60@2x.png",
+    "sha256": "599cbc91cf53e7c982994dacca92be8bd4b60570c583056839538b2028809612",
+    "rights": "CC BY 4.0; James Cullimore; existing StarJar launcher rendition, see licenses/ARTWORK.txt; opaque PNG encoding for Apple packaging"
   }
 ]

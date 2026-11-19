@@ -1,3 +1,4 @@
+import iconLabels from "../../shared/src/commonMain/composeResources/files/icon-labels.json" with { type: "json" };
 export const strings = {
   en: {
     reviewedLabel: "Saved routine · reviewed by you",
@@ -452,12 +453,12 @@ Object.assign(strings.de, {
 
 Object.assign(strings.en, {
   advancedCloud:
-    "AI-generated badges, streaks, reminders and urgency currently need cloud generation. Allow cloud access for this session, or turn those options off and edit the details yourself offline.",
+    "AI-generated badges, frequency limits, streaks, reminders and urgency currently need cloud generation. Allow cloud access for this session, or turn those options off and edit the details yourself offline.",
   cloud: "Allow cloud generation for this session",
 });
 Object.assign(strings.de, {
   advancedCloud:
-    "Für Abzeichen, Serienboni, Erinnerungen und Dringlichkeit benötigt die KI derzeit die Cloud. Erlaube den Cloud-Zugriff für diese Sitzung oder deaktiviere diese Optionen und ergänze die Angaben selbst offline.",
+    "Für Abzeichen, Häufigkeitsgrenzen, Serienboni, Erinnerungen und Dringlichkeit benötigt die KI derzeit die Cloud. Erlaube den Cloud-Zugriff für diese Sitzung oder deaktiviere diese Optionen und ergänze die Angaben selbst offline.",
   cloud: "Cloud-Generierung für diese Sitzung erlauben",
 });
 strings.en.aiOptionsHelp +=
@@ -485,3 +486,60 @@ Object.assign(strings.de, {
   rewardPreferencesInfo:
     "Diese Wünsche gelten für neue Belohnungsvorschläge. Deine bisherigen Ideen bleiben unverändert.",
 });
+
+Object.assign(strings.en, {
+  printPlan: "Print a weekly chart",
+  openPlan: "Open a plan or StarJar export",
+  useElsewhere: "Share or continue elsewhere",
+  transferInfo:
+    "Share kept items with a compatible app, or save an editable plan to continue in another browser. The editable file includes all cards and choices, but not your original description. Sharing uses your device’s share menu; StarJar must support receiving the file.",
+  shareKept: "Share kept items…",
+  shareDone:
+    "File handed to your device’s share menu. Review it in the receiving app.",
+  shareCancelled: "Sharing cancelled. Your ideas are unchanged.",
+  shareUnsupported:
+    "File sharing is unavailable in this browser. Use Export kept items, then open the downloaded file in the other app.",
+  saveEditable: "Save editable plan",
+  importedTitle: "Imported ideas",
+  reviewImport: "Review the incoming plan",
+  reviewImportInfo:
+    "These ideas will open in the editor. Nothing is sent to AI or created in StarJar. Your current draft is replaced only when you choose to open this plan.",
+  openImported: "Open in the editor",
+  importInvalid:
+    "This file is not a supported plan or StarJar export, contains invalid values, or exceeds 40 items / 200 KB.",
+});
+Object.assign(strings.de, {
+  printPlan: "Wochenplan drucken",
+  openPlan: "Plan oder StarJar-Export öffnen",
+  useElsewhere: "Teilen oder anderswo fortsetzen",
+  transferInfo:
+    "Teile ausgewählte Einträge mit einer kompatiblen App oder speichere einen bearbeitbaren Plan für einen anderen Browser. Die Datei enthält alle Karten und deine Auswahl, aber nicht deine ursprüngliche Beschreibung. Zum Teilen wird das Menü deines Geräts geöffnet. StarJar muss den Empfang der Datei unterstützen.",
+  shareKept: "Ausgewählte Einträge teilen…",
+  shareDone:
+    "Die Datei wurde an das Teilen-Menü übergeben. Prüfe sie in der empfangenden App.",
+  shareCancelled: "Teilen abgebrochen. Deine Ideen bleiben unverändert.",
+  shareUnsupported:
+    "Dieser Browser unterstützt das Teilen von Dateien nicht. Exportiere die ausgewählten Einträge und öffne die heruntergeladene Datei in der anderen App.",
+  saveEditable: "Bearbeitbaren Plan speichern",
+  importedTitle: "Importierte Ideen",
+  reviewImport: "Eingehenden Plan prüfen",
+  reviewImportInfo:
+    "Diese Ideen werden im Editor geöffnet. Es wird nichts an die KI gesendet oder in StarJar erstellt. Dein aktueller Entwurf wird erst ersetzt, wenn du diesen Plan öffnest.",
+  openImported: "Im Editor öffnen",
+  importInvalid:
+    "Die Datei ist kein unterstützter Plan oder StarJar-Export, enthält ungültige Werte oder überschreitet 40 Einträge bzw. 200 KB.",
+});
+
+strings.en.localLanguageUnavailable = "German on-device suggestions are not reliable enough yet. Write your own ideas, switch to English, or explicitly allow cloud generation for this session.";
+strings.de.localLanguageUnavailable = "Die lokale KI liefert auf Deutsch noch keine verlässlichen Vorschläge. Schreibe eigene Ideen, wechsle zu Englisch oder erlaube ausdrücklich die Cloud-Generierung für diese Sitzung.";
+
+strings.en.localDefaults = "On-device suggestions start with 5 stars per task and 20 per reward. You can change stars, icons and other details before export.";
+strings.de.localDefaults = "Lokale Vorschläge beginnen mit 5 Sternen pro Aufgabe und 20 pro Belohnung. Sterne, Symbole und weitere Angaben kannst du vor dem Export ändern.";
+
+for (const [id, labels] of Object.entries(iconLabels)) {
+  strings.en["icon_" + id] = labels.en;
+  strings.de["icon_" + id] = labels.de;
+}
+
+strings.en.chosenCountOne = "1 item kept for StarJar";
+strings.de.chosenCountOne = "1 Idee für StarJar behalten";

@@ -1,6 +1,7 @@
 // Opt-in real on-device test. Use a dedicated test profile; model download may take several GB.
 import { chromium } from "@playwright/test";
 import fs from "node:fs";
+import { readPlanFile } from "../src/transfer.js";
 import { spawn } from "node:child_process";
 const out =
   process.env.ROUTINE_EVIDENCE || "/tmp/routine-parent-local-evidence";
@@ -19,7 +20,9 @@ const server = spawn(
   { stdio: "ignore" },
 );
 let context;
-const result = { at: new Date().toISOString() };
+const language = process.env.ROUTINE_TEST_LANGUAGE === "de" ? "de" : "en";
+const result = { at: new Date().toISOString(), language, cloudAllowed: false, cloudRequests: 0 };
+const localLabel = language === "de" ? "Auf diesem Gerät" : "Generated on this device";
 try {
   await new Promise((r) => setTimeout(r, 500));
   context = await chromium.launchPersistentContext(
@@ -30,7 +33,7 @@ try {
         ? { executablePath: process.env.ROUTINE_CHROME_PATH }
         : { channel: "chrome" }),
       headless: true,
-      locale: "en",
+      locale: language,
       ignoreDefaultArgs: [
         "--disable-component-update",
         "--disable-background-networking",
@@ -41,6 +44,10 @@ try {
       viewport: { width: 1100, height: 950 },
     },
   );
+  result.browserVersion = context.browser()?.version();
+  context.on("request", request => {
+    if (/generativelanguage|firebasevertexai|aiplatform/.test(request.url())) result.cloudRequests++;
+  });
   const page = await context.newPage();
   page.on("console", (m) => {
     if (m.text().startsWith("Routine generation code:")) {
@@ -61,14 +68,21 @@ try {
   await page
     .locator("#goal")
     .fill(
-      "Getting out of bed is difficult for a primary-school child. Dressing is fine. They enjoy music and games.",
+      language === "de" ? "Morgens fällt meinem Grundschulkind das Aufstehen schwer. Anziehen klappt gut. Es mag Musik und Spiele." : "Getting out of bed is difficult for a primary-school child. Dressing is fine. They enjoy music and games.",
     );
   await page.locator("#age-band").selectOption("primary");
   await page.locator("#minutes").fill("20");
 
   await page
-    .getByRole("button", { name: "Find tasks and rewards", exact: true })
+    .locator("form button[type=submit]")
     .click();
+  if (language === "de") {
+    await page.waitForFunction(() => document.getElementById("status").textContent.includes("noch keine verlässlichen"));
+    if (result.cloudRequests !== 0) throw Error("Cloud request without consent");
+    result.localUnsupported = true;
+    result.pass = true;
+    console.log(JSON.stringify({ pass: true, localUnsupported: true, cloudRequests: 0 }));
+  } else {
   for (let i = 0; i < 120; i++) {
     await page.waitForTimeout(5000);
     if (await page.locator("#selected-count").count()) break;
@@ -78,15 +92,14 @@ try {
         await page.locator("#status").innerText(),
       );
     if (
-      await page
-        .getByRole("button", { name: "Find tasks and rewards", exact: true })
-        .count()
+      (await page.locator("form button[type=submit]").count()) &&
+      (await page.locator("form button[type=submit]").isEnabled())
     )
       throw Error(await page.locator("#status").innerText());
   }
   await page.locator("#selected-count").waitFor({ timeout: 1000 });
   result.receipt = await page.locator("#receipt").innerText();
-  if (!result.receipt.startsWith("Generated on this device"))
+  if (!result.receipt.startsWith(localLabel))
     throw Error("Not local");
   result.plan = await page.evaluate(
     () => JSON.parse(localStorage.getItem("routine-draft-v2")).plan,
@@ -95,7 +108,7 @@ try {
   await context.setOffline(true);
   await page
     .locator("#feedback")
-    .fill("Suggest a different reward involving choosing a shared game.");
+    .fill(language === "de" ? "Schlage eine andere Belohnung vor, bei der das Kind ein gemeinsames Spiel auswählen darf." : "Suggest a different reward involving choosing a shared game.");
   await page.locator("#more-ideas").click();
   await page.waitForFunction(
     () => !document.getElementById("more-ideas").disabled,
@@ -118,10 +131,24 @@ try {
   }
   if (
     !(await page.locator("#receipt").innerText()).startsWith(
-      "Generated on this device",
+      localLabel,
     )
   )
     throw Error("Expected local offline source");
+  while (await page.locator('[data-action="keep"][aria-pressed="false"]').count()) await page.locator('[data-action="keep"][aria-pressed="false"]').first().click();
+  const downloadEvent = page.waitForEvent("download");
+  await page.locator("#export").click();
+  const download = await downloadEvent;
+  const exportPath = out + "/starjar-templates.json";
+  await download.saveAs(exportPath);
+  const imported = readPlanFile(fs.readFileSync(exportPath, "utf8"), language);
+  if (imported.items.length !== result.offlinePlan.items.length) throw Error("Export roundtrip lost ideas");
+  result.exportRoundTrip = true;
+  await page.evaluate(() => navigator.serviceWorker.ready);
+  await page.reload();
+  await page.locator("#selected-count").waitFor();
+  result.offlineReload = true;
+  if (result.cloudRequests !== 0) throw Error("Unexpected cloud request");
   result.pass = true;
   console.log(
     JSON.stringify({
@@ -131,6 +158,7 @@ try {
       offline: result.offlinePlan.items.length,
     }),
   );
+  }
 } catch (e) {
   result.pass = false;
   result.error = e.message;
