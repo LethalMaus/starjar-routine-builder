@@ -4,6 +4,14 @@ Find tasks and rewards to help your child with an everyday difficulty, review th
 
 You can write routines yourself without an account, subscription or AI service. AI suggestions always open in the editor for review; they are never added to StarJar automatically.
 
+## Try the evaluation builds
+
+- [Web app](https://starjar-hybrid-ai-2026--owner-trial-3bw6xpvp.web.app)
+- [Android evaluation APK and checksum](https://github.com/LethalMaus/starjar-routine-builder/releases/tag/v0.9.0-evaluation)
+- [iOS TestFlight invitation](https://testflight.apple.com/join/rfumXyZV)
+
+See the [evaluation walkthrough](docs/JUDGING.md) for tested models, offline setup, signing differences and cloud availability limits. These are evaluation builds, not a production release.
+
 ## Try the web app locally
 
 Requirements: Node.js 24.12 or later and npm.
