@@ -212,8 +212,8 @@ fun ParentApp(
         CompositionLocalProvider(LocalPlanLanguage provides language) {
             Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                 Column(
+                    // safeDrawing already includes the keyboard inset; apply it only once.
                     Modifier.windowInsetsPadding(WindowInsets.safeDrawing)
-                        .imePadding()
                         .verticalScroll(scroll)
                         .padding(20.dp)
                         .widthIn(max = 760.dp),

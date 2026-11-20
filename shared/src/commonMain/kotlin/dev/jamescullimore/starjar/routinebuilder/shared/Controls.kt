@@ -3,9 +3,12 @@ package dev.jamescullimore.starjar.routinebuilder.shared
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 
 /**
@@ -93,6 +96,7 @@ fun ParentTextField(
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     supportingText: @Composable (() -> Unit)? = null,
 ) {
+    val focusManager = LocalFocusManager.current
     OutlinedTextField(
         value,
         onValueChange,
@@ -102,7 +106,10 @@ fun ParentTextField(
         singleLine = singleLine,
         minLines = minLines,
         isError = isError,
-        keyboardOptions = keyboardOptions,
+        keyboardOptions = keyboardOptions.copy(
+            imeAction = if (keyboardOptions.imeAction == ImeAction.Default || keyboardOptions.imeAction == ImeAction.Unspecified) ImeAction.Done else keyboardOptions.imeAction,
+        ),
+        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
         supportingText = supportingText,
         colors =
             OutlinedTextFieldDefaults.colors(

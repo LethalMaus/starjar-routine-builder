@@ -1,6 +1,46 @@
 import XCTest
 
 final class SmokeTests: XCTestCase {
+  func testKeyboardCanBeDismissedAndFormRemainsScrollable() throws {
+    continueAfterFailure = false
+    let app = XCUIApplication()
+    app.launchArguments = ["-AppleLanguages", "(en)", "-AppleLocale", "en_US", "-parent-plan", ""]
+    app.launch()
+    let field = app.textViews["What would you like to make easier?"]
+    XCTAssertTrue(field.waitForExistence(timeout: 10))
+    field.tap()
+    field.typeText("Help a child get dressed for school. Suggest small tasks and free rewards.")
+    field.tap()
+    Thread.sleep(forTimeInterval: 1)
+    XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5))
+    let shown = XCTAttachment(screenshot: app.screenshot())
+    shown.name = "Form with keyboard"; shown.lifetime = .keepAlways; add(shown)
+    // A visible native Done action must dismiss even a multiline prompt.
+    let done = app.keyboards.buttons.matching(NSPredicate(format: "label ==[c] %@", "done")).firstMatch
+    XCTAssertTrue(done.waitForExistence(timeout: 5))
+    if done.isHittable {
+      done.tap()
+    } else {
+      // Headless simulators may expose the keyboard below the display while using hardware input.
+      // Return must invoke the same Done action rather than inserting another line.
+      app.typeText("\n")
+    }
+    XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5))
+    let generate = app.buttons["Find tasks and rewards"]
+    for _ in 0..<12 {
+      if generate.exists && app.frame.insetBy(dx: 0, dy: 16).contains(generate.frame) { break }
+      app.swipeUp(velocity: .slow)
+      Thread.sleep(forTimeInterval: 0.8)
+    }
+    XCTAssertTrue(generate.isEnabled)
+    XCTAssertTrue(app.frame.insetBy(dx: 0, dy: 16).contains(generate.frame))
+    // Do not invoke generation: this regression must not consume model quota.
+    XCTAssertFalse(app.keyboards.firstMatch.exists)
+    let finished = XCTAttachment(screenshot: app.screenshot())
+    finished.name = "Reachable generation action"; finished.lifetime = .keepAlways; add(finished)
+    app.terminate()
+  }
+
   func testDirectEntryManualPlanAndReview() throws {
     let app = XCUIApplication()
     app.launchArguments = ["-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
