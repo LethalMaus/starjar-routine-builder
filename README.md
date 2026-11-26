@@ -7,7 +7,7 @@ You can write routines yourself without an account, subscription or AI service. 
 ## Try the evaluation builds
 
 - [Web app](https://starjar-hybrid-ai-2026--owner-trial-3bw6xpvp.web.app)
-- [Android evaluation APK and checksum](https://github.com/LethalMaus/starjar-routine-builder/releases/tag/v0.10.0-evaluation)
+- [Android evaluation APK and checksum](https://github.com/LethalMaus/starjar-routine-builder/releases/tag/v0.11.0-evaluation)
 - [iOS TestFlight invitation](https://testflight.apple.com/join/rfumXyZV)
 
 See the [evaluation walkthrough](docs/JUDGING.md) for tested models, offline setup, signing differences and cloud availability limits. These are evaluation builds, not a production release.
@@ -73,7 +73,7 @@ The web app can print a weekly task and reward chart without StarJar. Paper tick
 
 ## How generation works
 
-Local-only is the default. Cloud fallback requires explicit consent for the current session and uses Firebase AI Logic with `gemini-3.5-flash-lite`. Results are labelled using the SDK's actual inference source. A compatible Chrome setup with a downloaded model supports offline generation. Android tries the available preview and stable model routes. Local generation was verified on a Pixel 9 using the stable Nano-v3 model; this is not evidence of Nano 4/Gemma 4. Preview-model availability still depends on the device and programme access.
+Local-only is the default. Cloud fallback requires explicit consent for the current session and uses Firebase AI Logic with `gemini-3.5-flash-lite`. Results are labelled using the SDK's actual inference source. A compatible Chrome setup with a downloaded model supports offline generation. Android tries the available preview and stable model routes. On a Pixel 9, build 11 generated English suggestions using Nano 4 Fast with cloud permission off. Earlier testing verified the stable Nano-v3 route. Preview-model availability still depends on the device and programme access.
 
 Suggestions can contain mistakes. Review names, language, suitability and star amounts before saving or exporting. [Architecture and testing](docs/DEVELOPMENT.md) describes the validation boundaries and test suites.
 

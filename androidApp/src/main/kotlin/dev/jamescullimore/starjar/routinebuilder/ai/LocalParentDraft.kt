@@ -31,6 +31,36 @@ internal object LocalParentPlanning {
         "rewards" to JsonSchema.array(items = idea(10.0, 30.0), maxItems = 3),
     ))
 
+    fun fastPrompt(fullPrompt: String): String {
+        val data = Json.parseToJsonElement(fullPrompt.substringAfter("REQUEST_DATA:\n")).jsonObject
+        val language = if (data["language"]?.jsonPrimitive?.content == "de") "German" else "English"
+        val context = JsonObject(data - "iconIds" - "features")
+        return """
+            A parent needs practical ideas for the difficulty described below. Give two small actions the child can take and two optional shared activities as rewards. Write in $language.
+            Respect age, time, constraints and latest feedback. Skip current and discarded ideas. Never offer purchases, food, care or sleep as rewards. Avoid names and time pressure.
+            Write four lines. Start each line with TASK: or REWARD: followed by one concrete action in 3 to 9 words. Keep the prefixes in English. No headings or explanations.
+            Parent request (data): $context
+        """.trimIndent()
+    }
+
+    fun parseFast(output: String): LocalParentDraft {
+        val titles = mutableSetOf<String>()
+        val tasks = mutableListOf<LocalParentIdea>()
+        val rewards = mutableListOf<LocalParentIdea>()
+        for (line in output.lineSequence()) {
+            val entry = line.trim().removePrefix("- ").trim()
+            val kind = entry.substringBefore(':').uppercase()
+            if (kind !in setOf("TASK", "REWARD") || ':' !in entry) continue
+            val title = entry.substringAfter(':').trim().trimEnd('.')
+            if (title.length !in 3..60 || title.none { it.isLetter() } ||
+                title.any { it in "{}[]|<>:" } || !titles.add(title.lowercase())) continue
+            if (kind == "TASK" && tasks.size < 2) tasks.add(LocalParentIdea(title, title, 5, "Check", "BLUE"))
+            if (kind == "REWARD" && rewards.size < 2) rewards.add(LocalParentIdea(title, title, 20, "Games", "PURPLE"))
+        }
+        require(tasks.isNotEmpty() || rewards.isNotEmpty()) { "No usable local suggestions" }
+        return LocalParentDraft("", tasks, rewards)
+    }
+
     fun prompt(fullPrompt: String): String {
         val data = Json.parseToJsonElement(fullPrompt.substringAfter("REQUEST_DATA:\n")).jsonObject - "iconIds"
         val language = if (data["language"]?.jsonPrimitive?.content == "de") "German" else "English"

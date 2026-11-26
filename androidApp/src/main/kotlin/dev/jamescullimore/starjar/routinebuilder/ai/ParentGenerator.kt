@@ -60,9 +60,18 @@ class ParentGenerator(
                         modelName = BuildConfig.CLOUD_MODEL,
                         onDeviceConfig = OnDeviceConfig(mode = InferenceMode.ONLY_ON_DEVICE, modelOption = option, maxOutputTokens = 2048, temperature = 0.2f, topK = 3),
                     )
-                    val result = withTimeout(120000) { local.generateObject(LocalParentPlanning.schema, LocalParentPlanning.prompt(prompt)) }
-                    check(result.response.inferenceSource == InferenceSource.ON_DEVICE)
-                    val text = LocalParentPlanning.encode(requireNotNull(result.getObject()))
+                    val draft = withTimeout(120000) {
+                        if (option == OnDeviceModelOption.PREVIEW_FAST) {
+                            val result = local.generateContent(LocalParentPlanning.fastPrompt(prompt))
+                            check(result.inferenceSource == InferenceSource.ON_DEVICE)
+                            LocalParentPlanning.parseFast(requireNotNull(result.text))
+                        } else {
+                            val result = local.generateObject(LocalParentPlanning.schema, LocalParentPlanning.prompt(prompt))
+                            check(result.response.inferenceSource == InferenceSource.ON_DEVICE)
+                            requireNotNull(result.getObject())
+                        }
+                    }
+                    val text = LocalParentPlanning.encode(draft)
                     lastLocalModelName = local.onDeviceExtension?.getModelName()
                     return text to "ON_DEVICE"
                 }

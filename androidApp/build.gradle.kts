@@ -15,7 +15,7 @@ android {
  compileSdk = 36
  defaultConfig {
   applicationId = "dev.jamescullimore.starjar.routinebuilder"
-  minSdk = 26; targetSdk = 36; versionCode = 10; versionName = "0.10-hackathon"
+  minSdk = 26; targetSdk = 36; versionCode = 11; versionName = "0.11-hackathon"
   testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   buildConfigField("String", "FIREBASE_APP_ID", firebaseValue("appId"))
   buildConfigField("String", "FIREBASE_PROJECT_ID", firebaseValue("projectId"))
