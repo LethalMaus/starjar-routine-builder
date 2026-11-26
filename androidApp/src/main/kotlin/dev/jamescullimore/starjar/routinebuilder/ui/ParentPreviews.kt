@@ -218,3 +218,17 @@ private fun ParentAccessPreview(language: String) {
         )
     }
 }
+
+@Preview @Composable fun ParentFeaturesEnPreview() = ParentFeaturesPreview("en")
+@Preview @Composable fun ParentFeaturesDePreview() = ParentFeaturesPreview("de")
+@Composable private fun ParentFeaturesPreview(language: String) {
+    dev.jamescullimore.starjar.routinebuilder.shared.RoutineBuilderTheme {
+        androidx.compose.material3.Surface {
+            androidx.compose.foundation.layout.Column(androidx.compose.ui.Modifier.padding(20.dp)) {
+                dev.jamescullimore.starjar.routinebuilder.shared.FeatureEditor(
+                    dev.jamescullimore.starjar.routinebuilder.shared.FeatureChoices(), language, true, initiallyExpanded = true, onChange = {}
+                )
+            }
+        }
+    }
+}

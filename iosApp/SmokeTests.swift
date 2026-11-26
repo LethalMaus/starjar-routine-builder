@@ -2,21 +2,31 @@ import XCTest
 
 final class SmokeTests: XCTestCase {
   func testKeyboardCanBeDismissedAndFormRemainsScrollable() throws {
+    try checkKeyboard(language: "en", landscape: false)
+  }
+
+  func testGermanKeyboardAndLandscape() throws {
+    try checkKeyboard(language: "de", landscape: true)
+  }
+
+  private func checkKeyboard(language: String, landscape: Bool) throws {
     continueAfterFailure = false
+    XCUIDevice.shared.orientation = landscape ? .landscapeLeft : .portrait
+    defer { XCUIDevice.shared.orientation = .portrait }
     let app = XCUIApplication()
-    app.launchArguments = ["-AppleLanguages", "(en)", "-AppleLocale", "en_US", "-parent-plan", ""]
+    app.launchArguments = ["-AppleLanguages", "(\(language))", "-AppleLocale", language == "de" ? "de_DE" : "en_US", "-parent-plan", ""]
     app.launch()
-    let field = app.textViews["What would you like to make easier?"]
+    let field = app.textViews[language == "de" ? "Was möchtest du leichter machen?" : "What would you like to make easier?"]
     XCTAssertTrue(field.waitForExistence(timeout: 10))
     field.tap()
     field.typeText("Help a child get dressed for school. Suggest small tasks and free rewards.")
     field.tap()
     Thread.sleep(forTimeInterval: 1)
     XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5))
-    let shown = XCTAttachment(screenshot: app.screenshot())
+    let shown = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
     shown.name = "Form with keyboard"; shown.lifetime = .keepAlways; add(shown)
     // A visible native Done action must dismiss even a multiline prompt.
-    let done = app.keyboards.buttons.matching(NSPredicate(format: "label ==[c] %@", "done")).firstMatch
+    let done = app.keyboards.buttons.matching(NSPredicate(format: "label ==[c] %@ OR label ==[c] %@", "done", "fertig")).firstMatch
     XCTAssertTrue(done.waitForExistence(timeout: 5))
     if done.isHittable {
       done.tap()
@@ -26,7 +36,7 @@ final class SmokeTests: XCTestCase {
       app.typeText("\n")
     }
     XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5))
-    let generate = app.buttons["Find tasks and rewards"]
+    let generate = app.buttons[language == "de" ? "Aufgaben und Belohnungen finden" : "Find tasks and rewards"]
     for _ in 0..<12 {
       if generate.exists && app.frame.insetBy(dx: 0, dy: 16).contains(generate.frame) { break }
       app.swipeUp(velocity: .slow)
@@ -36,9 +46,36 @@ final class SmokeTests: XCTestCase {
     XCTAssertTrue(app.frame.insetBy(dx: 0, dy: 16).contains(generate.frame))
     // Do not invoke generation: this regression must not consume model quota.
     XCTAssertFalse(app.keyboards.firstMatch.exists)
-    let finished = XCTAttachment(screenshot: app.screenshot())
+    let finished = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
     finished.name = "Reachable generation action"; finished.lifetime = .keepAlways; add(finished)
     app.terminate()
+  }
+
+  func testEditorAndFollowUpKeyboardsDismiss() throws {
+    continueAfterFailure = false
+    XCUIDevice.shared.orientation = .portrait
+    let app = XCUIApplication()
+    for kind in ["task", "reward"] {
+      // Launch-only draft override keeps the simulator's saved plans untouched.
+      let draft = #"{"format":"starjar-ideas-plan","version":1,"plan":{"id":"keyboard-test","title":"Keyboard test","items":[{"id":"idea","kind":"\#(kind)","name":"","state":"kept","pointAmount":5,"limitValue":1}]}}"#
+      app.launchArguments = ["-AppleLanguages", "(en)", "-AppleLocale", "en_US", "-parent-plan", String(data: try JSONEncoder().encode(draft), encoding: .utf8)!]
+      app.launch()
+      defer { app.terminate() }
+      XCTAssertTrue(app.textViews["Plan title"].waitForExistence(timeout: 10))
+      XCTAssertEqual(app.textViews["Plan title"].value as? String, "Keyboard test")
+      for label in ["Name", "Description", "More context or alternatives"] {
+        let field = app.textViews[label]
+        tapVisible(field, in: app, upward: true)
+        field.typeText("Test")
+        let done = app.keyboards.buttons.matching(NSPredicate(format: "label ==[c] %@ OR label ==[c] %@", "done", "fertig")).firstMatch
+        XCTAssertTrue(done.waitForExistence(timeout: 5))
+        if done.isHittable { done.tap() } else { app.typeText("\n") }
+        XCTAssertTrue(app.keyboards.firstMatch.waitForNonExistence(timeout: 5), "Keyboard must dismiss for \(kind) \(label)")
+        let capture = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        capture.name = "\(kind) — \(label)"; capture.lifetime = .keepAlways; add(capture)
+      }
+      app.terminate()
+    }
   }
 
   func testDirectEntryManualPlanAndReview() throws {
@@ -91,7 +128,7 @@ final class SmokeTests: XCTestCase {
     if #available(iOS 17.0, *) {
       try app.performAccessibilityAudit(for: [.hitRegion, .sufficientElementDescription, .trait, .contrast, .textClipped])
     }
-    let screenshot = XCTAttachment(screenshot: app.screenshot())
+    let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
     screenshot.lifetime = .keepAlways
     add(screenshot)
     tapVisible(app.buttons["Saved plans"], in: app, upward: false)
