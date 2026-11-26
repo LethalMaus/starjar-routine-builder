@@ -29,8 +29,8 @@ class ParentPreviewLibraryTest(
                     .getPreviews()
                     .filter { it.methodName.startsWith("Parent") }
                     .distinctBy { it.methodName }
-                    .sortedBy { it.methodName }
-            check(previews.size == 12)
+                    .sortedWith(compareBy<ComposablePreview<AndroidPreviewInfo>> { it.methodName.startsWith("ParentFeatures") }.thenBy { it.methodName })
+            check(previews.size == 14)
             return previews.flatMap { p ->
                 listOf(
                     arrayOf(p, 411, 891, 1f, false),
