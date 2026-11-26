@@ -110,6 +110,10 @@ class PlanTransferTest {
     fun unselectedFeaturesAreRemovedAndRequestedBadgeCountIsEnforced() {
         val response = PlanTransfer.templates(plan)
         val result = PlanEngine.merge(ParentPlan("empty", "Plan"), response, FeatureChoices(), ::id)
+        val generated = PlanEngine.merge(ParentPlan("empty", "Plan"), response, FeatureChoices(badgeCount = 20), ::id)
+        assertEquals(task.badges.first().copy(completionsRequired = 1), generated.items.single().badges.first())
+        assertEquals(task.badges.drop(1), generated.items.single().badges.drop(1))
+        assertEquals(task.badges, PlanTransfer.read(response, ::id).items.single().badges)
         assertTrue(result.items.single().badges.isEmpty())
         assertNull(result.items.single().reminder)
         assertFalse(result.items.single().isUrgent)

@@ -220,6 +220,10 @@ fun NativeItemCard(
                         enabled,
                     )
                     item.streakBonus?.let { streak ->
+                        Text(t(
+                            "A confirmed completion earns the bonus when it finishes a qualifying streak. For example: once a day for 5 days, or 3 completions per day for 5 consecutive days. Missed periods break the streak; completed streaks can earn the bonus again. These settings do not schedule reminders.",
+                            "Der Bonus wird vergeben, wenn eine bestätigte Erledigung die Serie abschließt. Zum Beispiel: einmal täglich für 5 Tage oder 3 Erledigungen pro Tag an 5 aufeinanderfolgenden Tagen. Ausgelassene Zeiträume unterbrechen die Serie. Eine neue vollständige Serie kann erneut einen Bonus bringen. Erinnerungen werden separat eingestellt."
+                        ))
                         NumberField(
                             t("Bonus stars", "Bonussterne"),
                             streak.bonusPoints,
@@ -227,26 +231,26 @@ fun NativeItemCard(
                             enabled,
                         )
                         NumberField(
-                            t("Complete every", "Erledigen alle"),
+                            t("Required frequency", "Häufigkeit für die Serie"),
                             streak.everyValue,
                             { update(item.copy(streakBonus = streak.copy(everyValue = it))) },
                             enabled,
                         )
                         Choice(
-                            t("Interval unit", "Intervalleinheit"),
+                            t("Frequency unit", "Zeiteinheit oder Erledigungen"),
                             streak.everyUnit,
                             PlanTransfer.units,
                             { update(item.copy(streakBonus = streak.copy(everyUnit = it))) },
                             enabled,
                         )
                         NumberField(
-                            t("Keep it up for", "Durchhalten für"),
+                            t("Streak target", "Ziel der Serie"),
                             streak.forValue,
                             { update(item.copy(streakBonus = streak.copy(forValue = it))) },
                             enabled,
                         )
                         Choice(
-                            t("Duration unit", "Dauereinheit"),
+                            t("Streak target unit", "Einheit für das Ziel der Serie"),
                             streak.forUnit,
                             PlanTransfer.units,
                             { update(item.copy(streakBonus = streak.copy(forUnit = it))) },

@@ -123,7 +123,9 @@ object PlanEngine {
                         limited.copy(
                             state = "suggested",
                             requireApproval = true,
-                            badges = if (features.badgeCount > 0) item.badges else emptyList(),
+                            badges = if (features.badgeCount > 0) {
+                                listOf(item.badges.first().copy(completionsRequired = 1)) + item.badges.drop(1)
+                            } else emptyList(),
                             streakBonus = if (features.streaks) item.streakBonus else null,
                             reminder = if (features.reminders) item.reminder else null,
                             isUrgent = features.urgency && item.isUrgent,

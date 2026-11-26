@@ -360,7 +360,7 @@ fun ParentApp(
                             style = MaterialTheme.typography.bodySmall,
                         )
                         Choice(
-                            t("Approximate age", "Ungefähres Alter"),
+                            t("Approximate age", "Altersgruppe"),
                             age,
                             listOf("unspecified", "preschool", "primary", "teen"),
                             { age = it },
@@ -871,9 +871,10 @@ fun FeatureEditor(
     value: FeatureChoices,
     language: String,
     enabled: Boolean,
+    initiallyExpanded: Boolean = false,
     onChange: (FeatureChoices) -> Unit,
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(initiallyExpanded) }
     fun t(en: String, de: String) = if (language == "de") de else en
     ParentOutlinedButton(
         onClick = { expanded = !expanded },
@@ -894,14 +895,15 @@ fun FeatureEditor(
             enabled,
             maximum = 20,
         )
+        Text(t("What else should AI consider in its suggestions?", "Was soll die KI bei ihren Vorschlägen zusätzlich berücksichtigen?"))
         Toggle(
-            t("Suggest frequency limits", "Häufigkeitsgrenzen vorschlagen"),
+            t("Suggest frequency limits", "Vorschlagen, wie oft etwas pro Tag oder Woche möglich sein soll"),
             value.frequency,
             { onChange(value.copy(frequency = it)) },
             enabled,
         )
         Toggle(
-            t("Suggest streak bonuses", "Serienboni vorschlagen"),
+            t("Suggest streak bonuses", "Bonus für mehrere Erledigungen in Folge vorschlagen"),
             value.streaks,
             { onChange(value.copy(streaks = it)) },
             enabled,
@@ -913,7 +915,7 @@ fun FeatureEditor(
             enabled,
         )
         Toggle(
-            t("Consider urgency", "Dringlichkeit berücksichtigen"),
+            t("Consider urgency", "Bei den Vorschlägen berücksichtigen, was dringend ist oder bis wann es erledigt sein muss"),
             value.urgency,
             { onChange(value.copy(urgency = it)) },
             enabled,
