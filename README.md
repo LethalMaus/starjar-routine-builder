@@ -7,7 +7,7 @@ You can write routines yourself without an account, subscription or AI service. 
 ## Try the evaluation builds
 
 - [Web app](https://starjar-hybrid-ai-2026--owner-trial-3bw6xpvp.web.app)
-- [Android evaluation APK and checksum](https://github.com/LethalMaus/starjar-routine-builder/releases/tag/v0.9.0-evaluation)
+- [Android evaluation APK and checksum](https://github.com/LethalMaus/starjar-routine-builder/releases/tag/v0.10.0-evaluation)
 - [iOS TestFlight invitation](https://testflight.apple.com/join/rfumXyZV)
 
 See the [evaluation walkthrough](docs/JUDGING.md) for tested models, offline setup, signing differences and cloud availability limits. These are evaluation builds, not a production release.

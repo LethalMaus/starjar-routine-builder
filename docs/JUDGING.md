@@ -4,9 +4,9 @@ The companion is free and has no purchase or subscription. StarJar is optional. 
 
 ## Access
 
-- Web: https://starjar-hybrid-ai-2026--owner-trial-3bw6xpvp.web.app — hosting expiry is 19 December 2026.
-- Android: [evaluation release](https://github.com/LethalMaus/starjar-routine-builder/releases/tag/v0.9.0-evaluation), version 0.9-hackathon (9), Android 8/API 26 or later. Download the APK and check its SHA-256 against the included checksum file.
-- iOS: [TestFlight invitation](https://testflight.apple.com/join/rfumXyZV), version 0.8 (8), beta approved and expiring on 17 February 2027. Install Apple’s TestFlight app, then open the invitation. App Store installation is not required.
+- Web: https://starjar-hybrid-ai-2026--owner-trial-3bw6xpvp.web.app — hosting expiry is 26 December 2026.
+- Android: [evaluation release](https://github.com/LethalMaus/starjar-routine-builder/releases/tag/v0.10.0-evaluation), version 0.10-hackathon (10), Android 8/API 26 or later. Download the APK and check its SHA-256 against the included checksum file.
+- iOS: [TestFlight invitation](https://testflight.apple.com/join/rfumXyZV), install Apple’s TestFlight app and open the invitation to see the latest approved external build and its expiry. App Store installation is not required.
 
 The Android APK uses the companion’s standalone signing certificate, which differs from Google Play’s managed app-signing certificate. Do not try to install it over a Play installation or uninstall to work around a mismatch without exporting plans and planning the migration. It does not replace the separate StarJar app.
 
@@ -24,7 +24,7 @@ The Android APK uses the companion’s standalone signing certificate, which dif
 
 Chrome Gemma 4 has completed on-device generation and offline follow-up through Firebase AI Logic. Model identity comes from Chrome component metadata; inference route comes from the SDK response. German local Chrome output was unreliable, so German currently uses cloud generation or manual editing.
 
-Android local evidence is from a Pixel 9 with stable Nano-v3, not Nano 4/Gemma 4. iOS protected cloud generation is tested. Simulator-on-compatible-Mac local inference is separate evidence; no physical iPhone local-model result is claimed. The public Android 0.9 evaluation APK was downloaded, checksum-verified, installed in place on a Pixel 9, and verified with both on-device generation and a consented cloud result using its release App Check provider. This verifies the standalone APK route, not Google Play installation. TestFlight installation and attestation still need final end-to-end verification.
+Android local evidence is from a Pixel 9 with stable Nano-v3, not Nano 4/Gemma 4. iOS protected cloud generation is tested. Simulator-on-compatible-Mac local inference is separate evidence; no physical iPhone local-model result is claimed. The signed Android 0.10 (10) APK was checksum-verified and launched on an Android 14 tablet emulator. The earlier public Android 0.9 evaluation APK was downloaded, checksum-verified, installed in place on a Pixel 9, and verified with both on-device generation and a consented cloud result using its release App Check provider. This verifies the standalone APK route, not Google Play installation. TestFlight installation and attestation still need final end-to-end verification.
 
 Cloud processing requires explicit session consent. The web app has no per-browser generation counter; native evaluation builds omit the installation courtesy counter. Shared service limits remain: currently 100 model requests per day and a configured EUR2 monthly Gemini service pause, within an approved EUR5 budget period through 16 December. These controls can interrupt cloud use. Hosting expiry does not guarantee unrestricted cloud availability. Manual editing remains available; local AI requires compatible hardware and a downloaded model.
 
