@@ -119,6 +119,7 @@ export function enforceChoices(item, raw) {
         ? Math.min(f.badgeCount, item.limitValue)
         : f.badgeCount;
     check(item.badges?.length === count);
+    item.badges[0] = { ...item.badges[0], completionsRequired: 1 };
     if (item.limitType === "TOTAL")
       check(item.badges.every((b) => b.completionsRequired <= item.limitValue));
   }

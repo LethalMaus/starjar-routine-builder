@@ -152,6 +152,7 @@ export function taskOptionsEditor(
   );
   if (item.streakBonus) {
     const b = item.streakBonus;
+    box.append(el("p", { class: "muted" }, t("streakHelp")));
     box.append(
       number(
         t("bonusStars"),

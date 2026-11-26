@@ -569,6 +569,7 @@ function featureControls() {
       }),
     ),
   );
+  box.append(el("p", {}, t("aiOptionsHeading")));
   for (const k of ["frequency", "streaks", "reminders", "urgency"])
     box.append(
       checkbox(

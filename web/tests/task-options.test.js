@@ -71,6 +71,12 @@ test("explicit generation preferences override content and enforce badge count",
   assert.throws(() =>
     enforceChoices(structuredClone(fullTask), { badgeCount: 10 }),
   );
+  const generated = structuredClone(fullTask);
+  generated.badges = [3, 7, 14].map((n, i) => ({ ...fullTask.badges[i], completionsRequired: n }));
+  const original = structuredClone(generated.badges);
+  enforceChoices(generated, { badgeCount: 3 });
+  assert.deepEqual(generated.badges, [{ ...original[0], completionsRequired: 1 }, ...original.slice(1)]);
+  assert.deepEqual(taskOptions({ badges: original }).badges, original);
   const limited = {
     ...structuredClone(fullTask),
     limitType: "TOTAL",

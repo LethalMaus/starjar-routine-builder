@@ -273,11 +273,11 @@ Object.assign(strings.de, {
   parentGoal: "Was möchtest du deinem Kind erleichtern?",
   parentPlaceholder:
     "Das Aufstehen fällt schwer, und beim Anziehen wird es dann hektisch.",
-  ageBand: "Ungefähres Alter (optional)",
+  ageBand: "Altersgruppe (optional)",
   age_unspecified: "Keine Angabe",
-  age_preschool: "Vorschulalter",
+  age_preschool: "Kindergartenalter",
   age_primary: "Grundschulalter",
-  age_teen: "Jugendliche",
+  age_teen: "Jugendalter",
   rewardPreferences: "Wünsche für Belohnungen (optional)",
   rewardPreferencesInfo:
     "Wähle diese Optionen, wenn die Ideen ohne Einkäufe oder Bildschirm auskommen sollen.",
@@ -364,10 +364,10 @@ Object.assign(strings.en, {
   addBadge: "Add badge",
   newBadge: "New achievement",
   streaks: "Streak bonus",
-  everyCount: "Every",
+  everyCount: "Required frequency",
   everyUnit: "Frequency unit",
-  forCount: "Maintain for",
-  forUnit: "Duration unit",
+  forCount: "Streak target",
+  forUnit: "Streak target unit",
   unit_TIME: "Completions",
   unit_DAY: "Days",
   unit_WEEK: "Weeks",
@@ -402,10 +402,10 @@ Object.assign(strings.de, {
   aiOptionsHelp:
     "Wähle, welche Angaben die KI für neue Ideen vorschlagen soll. Bestehende Karten bleiben unverändert. Ohne Zahl werden keine Abzeichen erstellt. Pro Aufgabe sind bis zu 20 möglich; probiere zum Beispiel 10.",
   badgeCount: "Abzeichen pro Aufgabe (optional)",
-  optimise_frequency: "Häufigkeitsgrenzen vorschlagen",
-  optimise_streaks: "Serienboni vorschlagen",
+  optimise_frequency: "Vorschlagen, wie oft etwas pro Tag oder Woche möglich sein soll",
+  optimise_streaks: "Bonus für mehrere Erledigungen in Folge vorschlagen",
   optimise_reminders: "Erinnerungen vorschlagen",
-  optimise_urgency: "Dringlichkeit und Fristen berücksichtigen",
+  optimise_urgency: "Bei den Vorschlägen berücksichtigen, was dringend ist oder bis wann es erledigt sein muss",
   badges: "Abzeichen",
   badge: "Abzeichen",
   badgeHelp:
@@ -417,10 +417,10 @@ Object.assign(strings.de, {
   addBadge: "Abzeichen hinzufügen",
   newBadge: "Neuer Erfolg",
   streaks: "Serienbonus",
-  everyCount: "Alle",
-  everyUnit: "Einheit der Häufigkeit",
-  forCount: "Beibehalten für",
-  forUnit: "Einheit der Dauer",
+  everyCount: "Häufigkeit für die Serie",
+  everyUnit: "Zeiteinheit oder Erledigungen",
+  forCount: "Ziel der Serie",
+  forUnit: "Einheit für das Ziel der Serie",
   unit_TIME: "Erledigungen",
   unit_DAY: "Tage",
   unit_WEEK: "Wochen",
@@ -543,3 +543,8 @@ for (const [id, labels] of Object.entries(iconLabels)) {
 
 strings.en.chosenCountOne = "1 item kept for StarJar";
 strings.de.chosenCountOne = "1 Idee für StarJar behalten";
+
+strings.en.aiOptionsHeading = "What else should AI consider in its suggestions?";
+strings.de.aiOptionsHeading = "Was soll die KI bei ihren Vorschlägen zusätzlich berücksichtigen?";
+strings.en.streakHelp = "A confirmed completion earns the bonus when it finishes a qualifying streak. For example: once a day for 5 days, or 3 completions per day for 5 consecutive days. Missed periods break the streak; completed streaks can earn the bonus again. These settings do not schedule reminders.";
+strings.de.streakHelp = "Der Bonus wird vergeben, wenn eine bestätigte Erledigung die Serie abschließt. Zum Beispiel: einmal täglich für 5 Tage oder 3 Erledigungen pro Tag an 5 aufeinanderfolgenden Tagen. Ausgelassene Zeiträume unterbrechen die Serie. Eine neue vollständige Serie kann erneut einen Bonus bringen. Erinnerungen werden separat eingestellt.";

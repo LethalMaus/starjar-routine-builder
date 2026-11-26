@@ -67,7 +67,7 @@ try {
       fullPage: true,
       animations: "disabled",
     });
-    await card.locator('.icon-grid button[title="Dishwasher"]').click();
+    await card.locator('.icon-grid button[data-search^="dishwasher "]').click();
     await card.locator(".badge-editor summary").first().click();
     await card
       .getByLabel(lang === "de" ? "Name des Abzeichens" : "Badge title", {
